@@ -32,8 +32,8 @@
 
         /* Grid */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 20px; max-width: 1200px; margin: auto; }
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px; transition: var(--transition); }
-        .card:hover { border-color: var(--accent); transform: translateY(-3px); }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px; transition: var(--transition); animation: fadeIn 0.5s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Modals */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9000; align-items: center; justify-content: center; backdrop-filter: blur(5px); flex-direction: column; }
@@ -44,12 +44,17 @@
         #notif-overlay { position: fixed; right: -400px; top: 0; width: 320px; height: 100%; background: var(--card); border-left: 1px solid var(--border); z-index: 5000; transition: var(--transition); padding: 20px; display: flex; flex-direction: column; }
         #notif-overlay.open { right: 0; }
         .notif-msg { background: #000; padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 3px solid var(--accent); position: relative; }
-        .del-msg { position: absolute; top: 10px; right: 10px; color: var(--danger); background: none; border: 0; cursor: pointer; font-size: 16px; opacity: 0.6; }
 
         /* FABs */
-        .fab { position: fixed; width: 55px; height: 55px; border-radius: 50%; border: 0; color: white; font-size: 20px; cursor: pointer; z-index: 2000; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
-        .add-fab { bottom: 30px; left: 30px; background: var(--accent); }
-        .notif-fab { bottom: 30px; right: 30px; background: #222; border: 1px solid var(--border); }
+        .fab { position: fixed; width: 55px; height: 55px; border-radius: 50%; border: 0; color: white; cursor: pointer; z-index: 2000; display: flex; align-items: center; justify-content: center; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .add-fab { bottom: 30px; left: 30px; background: var(--accent); font-size: 24px; }
+        .notif-fab { bottom: 100px; right: 30px; background: #222; border: 1px solid var(--border); font-size: 20px; }
+        
+        /* Logout Button (Bottom Right) */
+        .logout-fab { bottom: 30px; right: 30px; background: var(--danger); }
+        .logout-fab svg { width: 24px; height: 24px; fill: white; }
+
+        .empty-state { text-align: center; grid-column: 1 / -1; padding: 50px; color: var(--text-dim); }
     </style>
 </head>
 <body>
@@ -57,11 +62,11 @@
 <div id="gate">
     <div class="brand" style="font-size: 3rem;">VAULT<span>.10</span></div>
     <input type="password" id="pass" class="lock-box" placeholder="Access Key">
-    <button onclick="login()" class="btn-blue" style="width:280px; padding:15px; border:0; border-radius:12px; color:white; font-weight:bold; cursor:pointer;">Authenticate</button>
+    <button onclick="login()" class="btn-blue" style="width:280px; padding:15px; border:0; border-radius:12px; color:white; font-weight:bold; cursor:pointer; background:var(--accent);">Authenticate</button>
 </div>
 
 <header>
-    <div class="brand" onclick="sync()">VAULT<span>.10</span> <small style="font-size: 10px; opacity: 0.5;">(Refresh)</small></div>
+    <div class="brand" onclick="sync()">VAULT<span>.10</span> <small style="font-size: 10px; opacity: 0.4; margin-left: 5px;">Refresh</small></div>
     <div style="text-align: right;">
         <span id="u-name" style="font-weight:bold; display:block;">User</span>
         <span onclick="openModal('settings-modal')" style="color:var(--accent); font-size:11px; cursor:pointer;">Cloud Config</span>
@@ -70,7 +75,7 @@
 
 <div class="controls">
     <input type="text" id="search-bar" placeholder="Search chapter..." oninput="render()">
-    <nav id="sub-nav">
+    <nav>
         <button class="sub-pill active" onclick="setSub('All', this)">All</button>
         <button class="sub-pill" onclick="setSub('Maths', this)">Maths</button>
         <button class="sub-pill" onclick="setSub('Science', this)">Science</button>
@@ -84,32 +89,32 @@
 
 <div id="settings-modal" class="modal">
     <div class="modal-ui">
-        <h3>Cloud Config</h3>
+        <h3>Cloud Settings</h3>
         <input type="password" id="set-token" placeholder="GitHub Token">
         <input type="text" id="set-user" placeholder="Username">
         <input type="text" id="set-repo" placeholder="Repo Name">
-        <button onclick="saveSettings()" class="btn-blue" style="width:100%; padding:12px; border:0; border-radius:8px;">Save</button>
+        <button onclick="saveSettings()" style="width:100%; padding:12px; background:var(--accent); color:white; border:0; border-radius:8px; font-weight:bold;">Save & Sync</button>
         <button onclick="closeModal('settings-modal')" style="width:100%; background:none; border:0; color:var(--text-dim); margin-top:10px;">Close</button>
     </div>
 </div>
 
 <div id="up-modal" class="modal">
     <div class="modal-ui">
-        <h3>Upload Notes</h3>
+        <h3>Push Notes</h3>
         <select id="f-sub"><option>Maths</option><option>Science</option><option>SST</option><option>Hindi</option><option>English</option></select>
         <input type="text" id="f-chap" placeholder="Chapter Name">
         <input type="file" id="f-files" multiple accept="image/*">
-        <button onclick="pushNotes()" id="up-btn" class="btn-blue" style="width:100%; padding:12px; border:0; border-radius:8px;">Push to Cloud</button>
+        <button onclick="pushNotes()" id="up-btn" style="width:100%; padding:12px; background:var(--accent); color:white; border:0; border-radius:8px; font-weight:bold;">Upload to GitHub</button>
         <button onclick="closeModal('up-modal')" style="width:100%; background:none; border:0; color:var(--text-dim); margin-top:10px;">Cancel</button>
     </div>
 </div>
 
 <div id="pre-modal" class="modal">
-    <div style="width:90%; max-width:800px; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+    <div style="width:95%; max-width:900px; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
         <h3 id="pre-title">Preview</h3>
-        <button onclick="closeModal('pre-modal')" style="background:none; border:0; color:white; font-size:30px;">&times;</button>
+        <button onclick="closeModal('pre-modal')" style="background:none; border:0; color:white; font-size:30px; cursor:pointer;">&times;</button>
     </div>
-    <div id="gallery" style="overflow-y:auto; max-height:80vh; width:90%; max-width:800px; display:flex; flex-direction:column; gap:20px;"></div>
+    <div id="gallery" style="overflow-y:auto; max-height:85vh; width:95%; max-width:900px; display:flex; flex-direction:column; gap:25px;"></div>
 </div>
 
 <div id="notif-overlay">
@@ -118,14 +123,20 @@
         <button onclick="toggleNotif(false)" style="background:none; border:0; color:white; font-size:25px;">&times;</button>
     </div>
     <div style="margin-bottom:15px;">
-        <input type="text" id="chat-input" class="lock-box" style="width:100%; font-size:12px; box-sizing:border-box;" placeholder="Message friends...">
-        <button onclick="sendChat()" class="btn-blue" style="width:100%; padding:8px; border:0; border-radius:8px;">Send</button>
+        <input type="text" id="chat-input" class="lock-box" style="width:100%; font-size:12px; box-sizing:border-box;" placeholder="Type message...">
+        <button onclick="sendChat()" style="width:100%; padding:8px; background:var(--accent); border:0; border-radius:8px; color:white;">Send</button>
     </div>
     <div id="notif-list" style="overflow-y:auto; flex:1;"></div>
 </div>
 
 <button class="fab add-fab" onclick="openModal('up-modal')">+</button>
 <button class="fab notif-fab" onclick="toggleNotif(true)">🔔</button>
+
+<button class="fab logout-fab" onclick="logout()" title="Logout">
+    <svg viewBox="0 0 24 24">
+        <path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/>
+    </svg>
+</button>
 
 <script>
     const keys = { "U2lkIzl4WjI=": "Siddharth", "VGVqKjRrTDc=": "Tejeshwar", "QWp5JjFtUDU=": "Ajay" };
@@ -142,39 +153,57 @@
         const t = localStorage.getItem("gh_token"), u = localStorage.getItem("gh_user"), r = localStorage.getItem("gh_repo");
         if(!t || !u || !r) return { ok: false };
         const url = `https://api.github.com/repos/${u}/${r}/contents/${path}`;
-        const headers = { "Authorization": `token ${t}`, "Accept": "application/vnd.github.v3+json" };
+        const headers = { "Authorization": `token ${t}`, "Accept": "application/vnd.github.v3+json", "Cache-Control": "no-cache" };
         return fetch(url, { method, headers, body: body ? JSON.stringify(body) : null });
     }
 
     function login() {
         const p = document.getElementById('pass').value.trim();
         if(keys[btoa(p)]) { localStorage.setItem("v_user", keys[btoa(p)]); location.reload(); }
-        else alert("Wrong Key!");
+        else alert("Invalid Key");
     }
+
+    function logout() { localStorage.removeItem("v_user"); location.reload(); }
 
     window.onload = () => {
         const u = localStorage.getItem("v_user");
         if(u) { 
             document.getElementById('gate').style.display = 'none'; 
             document.getElementById('u-name').innerText = u;
+            // Load saved config into inputs for easy editing
+            document.getElementById('set-token').value = localStorage.getItem("gh_token") || "";
+            document.getElementById('set-user').value = localStorage.getItem("gh_user") || "";
+            document.getElementById('set-repo').value = localStorage.getItem("gh_repo") || "";
             sync();
         }
     };
 
     async function sync() {
-        const res = await gh("data");
+        // Use a random query param to bust GitHub cache
+        const cacheBuster = `?cb=${Date.now()}`;
+        const res = await gh("data" + cacheBuster);
+        
         if (res.ok) {
             const files = await res.json();
             db = [];
-            for (let f of files) { 
-                if (f.name.endsWith('.json')) {
-                    const d = await (await fetch(f.download_url + "?t=" + Date.now())).json();
-                    db.push(d);
-                }
+            // Filter only .json files in the /data folder
+            const jsonFiles = files.filter(f => f.name.endsWith('.json'));
+            
+            for (let f of jsonFiles) {
+                try {
+                    const contentRes = await fetch(f.download_url + cacheBuster);
+                    if (contentRes.ok) {
+                        const data = await contentRes.json();
+                        db.push(data);
+                    }
+                } catch(e) { console.error("Error loading file:", f.name); }
             }
             render();
+        } else {
+            document.getElementById('main-grid').innerHTML = `<div class="empty-state">No data found in /data folder or Config is wrong.</div>`;
         }
-        const cRes = await gh("hub_chat.json");
+
+        const cRes = await gh("hub_chat.json" + cacheBuster);
         if (cRes.ok) {
             const cData = await cRes.json();
             chats = JSON.parse(atob(cData.content));
@@ -184,9 +213,9 @@
 
     async function pushNotes() {
         const sub = document.getElementById('f-sub').value, chap = document.getElementById('f-chap').value.trim(), fileInput = document.getElementById('f-files');
-        if(!chap || fileInput.files.length === 0) return alert("Fill all fields!");
+        if(!chap || fileInput.files.length === 0) return alert("Fill all details!");
         
-        const btn = document.getElementById('up-btn'); btn.innerText = "Uploading..."; btn.disabled = true;
+        const btn = document.getElementById('up-btn'); btn.innerText = "Syncing with GitHub..."; btn.disabled = true;
 
         try {
             const imgs = await Promise.all(Array.from(fileInput.files).map(f => new Promise(r => {
@@ -204,14 +233,14 @@
             }
 
             data.notes.push({ author: localStorage.getItem("v_user"), time: new Date().toLocaleString(), pages: imgs });
-            const push = await gh(fileName, "PUT", { message: `Upload ${chap}`, content: btoa(JSON.stringify(data)), sha: sha });
+            const push = await gh(fileName, "PUT", { message: `Cloud Update: ${chap}`, content: btoa(JSON.stringify(data)), sha: sha });
 
             if(push.ok) {
-                alert("Notes Uploaded Successfully! ✅");
+                alert("Notes Successfully Pushed! ✅");
                 closeModal('up-modal'); sync();
-            } else { alert("Upload Failed! ❌ Check Cloud Config."); }
+            } else { alert("Push Failed! ❌ Check GitHub permissions."); }
         } catch(e) { alert("Error: " + e); }
-        btn.innerText = "Push to Cloud"; btn.disabled = false;
+        btn.innerText = "Upload to GitHub"; btn.disabled = false;
     }
 
     async function sendChat() {
@@ -222,45 +251,52 @@
         const check = await gh("hub_chat.json");
         let sha = check.ok ? (await check.json()).sha : null;
         
-        await gh("hub_chat.json", "PUT", { message: "Chat", content: btoa(JSON.stringify(chats.slice(0,30))), sha: sha });
+        await gh("hub_chat.json", "PUT", { message: "Chat Update", content: btoa(JSON.stringify(chats.slice(0,30))), sha: sha });
         input.value = ""; sync();
     }
 
     async function deleteMsg(id) {
-        if(!confirm("Delete this message?")) return;
+        if(!confirm("Delete your message?")) return;
         chats = chats.filter(c => c.id !== id);
         const check = await gh("hub_chat.json");
-        let sha = check.ok ? (await check.json()).sha : null;
-        await gh("hub_chat.json", "PUT", { message: "Del", content: btoa(JSON.stringify(chats)), sha: sha });
+        let sha = (await check.json()).sha;
+        await gh("hub_chat.json", "PUT", { message: "Delete Msg", content: btoa(JSON.stringify(chats)), sha: sha });
         sync();
     }
 
     function render() {
         const grid = document.getElementById('main-grid'), q = document.getElementById('search-bar').value.toLowerCase();
         grid.innerHTML = "";
-        db.filter(i => (activeSub === "All" || i.subject === activeSub) && i.chapter.toLowerCase().includes(q))
-        .forEach(item => {
+        
+        const filtered = db.filter(i => (activeSub === "All" || i.subject === activeSub) && i.chapter.toLowerCase().includes(q));
+        
+        if(filtered.length === 0) {
+            grid.innerHTML = `<div class="empty-state">No notes found for "${activeSub}". Try refreshing or check /data folder.</div>`;
+            return;
+        }
+
+        filtered.forEach(item => {
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
-                <div style="font-size:10px; color:var(--accent); font-weight:bold;">${item.subject.toUpperCase()}</div>
-                <div style="font-size:1.2rem; font-weight:bold; margin: 10px 0;">${item.chapter}</div>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-size:11px; color:var(--text-dim)">${item.notes.length} People</span>
-                    <button class="btn-blue" style="border:0; padding:6px 12px; border-radius:6px; cursor:pointer;" onclick="viewVault('${item.chapter}')">Open</button>
+                <div style="font-size:10px; color:var(--accent); font-weight:900; letter-spacing:1px;">${item.subject.toUpperCase()}</div>
+                <div style="font-size:1.3rem; font-weight:800; margin: 12px 0;">${item.chapter}</div>
+                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #222; padding-top:15px;">
+                    <span style="font-size:11px; color:var(--text-dim)">${item.notes.length} Contributor(s)</span>
+                    <button class="btn-blue" style="border:0; padding:8px 16px; border-radius:8px; cursor:pointer; background:var(--accent); color:white; font-weight:bold;" onclick="viewVault('${item.chapter}')">Open Vault</button>
                 </div>`;
             grid.appendChild(card);
         });
     }
 
     function renderChats() {
-        const user = localStorage.getItem("v_user");
+        const me = localStorage.getItem("v_user");
         document.getElementById('notif-list').innerHTML = chats.map(c => `
             <div class="notif-msg">
                 <strong style="font-size:11px; color:var(--accent);">${c.user}</strong>
                 <div style="font-size:13px; margin:4px 0;">${c.text}</div>
                 <div style="font-size:9px; opacity:0.4;">${c.time}</div>
-                ${c.user === user ? `<button class="del-msg" onclick="deleteMsg(${c.id})">&times;</button>` : ''}
+                ${c.user === me ? `<button onclick="deleteMsg(${c.id})" style="position:absolute; top:10px; right:10px; background:none; border:0; color:var(--danger); cursor:pointer;">&times;</button>` : ''}
             </div>`).join('');
     }
 
@@ -269,18 +305,22 @@
         const gal = document.getElementById('gallery');
         document.getElementById('pre-title').innerText = name;
         gal.innerHTML = item.notes.map(n => `
-            <div style="padding:15px; background:#000; border-radius:12px; border:1px solid #222;">
-                <div style="color:var(--accent); font-size:12px; margin-bottom:10px;">By: ${n.author} | ${n.time}</div>
-                ${n.pages.map(p => `<img src="${p}" style="width:100%; border-radius:8px; margin-bottom:10px;">`).join('')}
+            <div style="padding:20px; background:#0a0a0a; border-radius:15px; border:1px solid #222;">
+                <div style="color:var(--accent); font-size:12px; margin-bottom:15px; font-weight:bold;">Contributor: ${n.author} | ${n.time}</div>
+                ${n.pages.map(p => `<img src="${p}" style="width:100%; border-radius:10px; margin-bottom:15px; border:1px solid #333;">`).join('')}
             </div>`).join('');
         openModal('pre-modal');
     }
 
-    function setSub(s, b) { activeSub = s; document.querySelectorAll('.sub-pill').forEach(x => x.classList.remove('active')); b.classList.add('active'); render(); }
+    function setSub(s, b) { 
+        activeSub = s; 
+        document.querySelectorAll('.sub-pill').forEach(x => x.classList.remove('active')); 
+        b.classList.add('active'); 
+        render(); 
+    }
     function toggleNotif(s) { document.getElementById('notif-overlay').classList.toggle('open', s); }
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    function logout() { localStorage.removeItem("v_user"); location.reload(); }
 </script>
 </body>
 </html>
