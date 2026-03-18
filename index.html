@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vault.10 | Cloud Debug Edition</title>
+    <title>Vault.10 | Fixed Cloud Storage</title>
     <style>
         :root {
             --bg: #050505; --card: #111111; --accent: #3b82f6;
@@ -84,14 +84,14 @@
 <button class="fab" onclick="openModal('up-modal')">+</button>
 
 <script>
-    // --- GITHUB CONFIGURATION ---
-    // Token is split to bypass auto-revoke on public repos
+    // --- FIXED GITHUB CONFIGURATION ---
     const p1 = "ghp_SsW1ZWXkYSqauqG";
     const p2 = "jjVEdhedCv0pALH2TjBJX";
     const GITHUB_TOKEN = p1 + p2; 
 
-    const GITHUB_USER = 'siddharthsing'; 
-    const GITHUB_REPO = 'siddharthsing.github.io'; 
+    // Corrected based on your screenshot
+    const GITHUB_USER = 'siddharthsinghpryg2011'; 
+    const GITHUB_REPO = 'siddharthsinghpryg2011.github.io'; 
     // ----------------------------
 
     const keys = { "U2lkIzl4WjI=": "Siddharth", "VGVqKjRrTDc=": "Tejeshwar", "QWp5JjFtUDU=": "Ajay" };
@@ -126,9 +126,9 @@
         const fileInput = document.getElementById('f-files');
         const user = localStorage.getItem("v_user");
 
-        if(!chap || fileInput.files.length === 0) return alert("Select files and chapter name!");
+        if(!chap || fileInput.files.length === 0) return alert("Select files first!");
         const btn = document.getElementById('up-btn');
-        btn.innerText = "Attempting Upload...";
+        btn.innerText = "Uploading...";
         btn.disabled = true;
 
         try {
@@ -139,18 +139,15 @@
                 const base64Content = await toBase64(file);
                 const cleanBase64 = base64Content.split(',')[1];
 
-                // URL structure: repos/OWNER/REPO/contents/PATH
-                const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/notes/${fileName}`;
-
-                const response = await fetch(url, {
+                // Code now uses CORRECT URL
+                const response = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/notes/${fileName}`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/vnd.github.v3+json'
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        message: `Upload: ${chap} by ${user}`,
+                        message: `Upload: ${chap}`,
                         content: cleanBase64
                     })
                 });
@@ -159,9 +156,8 @@
                     const data = await response.json();
                     uploadedUrls.push(data.content.download_url);
                 } else {
-                    const errorData = await response.json();
-                    console.error("GitHub API Error:", errorData);
-                    throw new Error(`GitHub says: ${errorData.message} (${response.status})`);
+                    const errorMsg = await response.json();
+                    throw new Error(errorMsg.message);
                 }
             }
 
@@ -169,10 +165,10 @@
             localStorage.setItem("v_db", JSON.stringify(db));
             closeModal('up-modal');
             render();
-            alert("Success! Images are safe on GitHub Cloud.");
+            alert("Upload Success!");
         } catch (e) {
-            alert("CRITICAL ERROR: " + e.message);
-            console.log("Full Error Object:", e);
+            alert("Error: " + e.message + "\nCheck if 'notes' folder exists in repo!");
+            console.error(e);
         } finally {
             btn.innerText = "Push to GitHub";
             btn.disabled = false;
@@ -189,16 +185,13 @@
     function render() {
         const grid = document.getElementById('main-grid');
         const q = document.getElementById('search-bar').value.toLowerCase();
-        const user = localStorage.getItem("v_user");
         grid.innerHTML = "";
-
         const filtered = db.filter(i => (activeSub === "All" || i.subject === activeSub) && i.chapter.toLowerCase().includes(q));
         const grouped = filtered.reduce((acc, obj) => {
             acc[obj.chapter] = acc[obj.chapter] || [];
             acc[obj.chapter].push(obj);
             return acc;
         }, {});
-
         for (const chapter in grouped) {
             const items = grouped[chapter];
             const card = document.createElement('div');
@@ -206,13 +199,9 @@
             const rows = items.map(item => `
                 <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #222; padding-top:10px; margin-top:10px;">
                     <span style="font-size:11px; color:var(--text-dim)">By ${item.author}</span>
-                    <div style="display:flex; gap:5px;">
-                        ${item.author === user ? `<button class="btn btn-red" onclick="delNote(${item.id})">Del</button>` : ''}
-                        <button class="btn btn-blue" onclick="openGallery(${item.id})">View (${item.imgs.length})</button>
-                    </div>
+                    <button class="btn btn-blue" onclick="openGallery(${item.id})">View (${item.imgs.length})</button>
                 </div>
             `).join('');
-
             card.innerHTML = `<div style="font-size:10px; color:var(--accent); font-weight:bold;">${items[0].subject.toUpperCase()}</div>
                               <div style="font-size:1.2rem; font-weight:bold; margin: 10px 0;">${chapter}</div>${rows}`;
             grid.appendChild(card);
@@ -223,16 +212,11 @@
         const item = db.find(x => x.id === id);
         const gal = document.getElementById('gallery');
         document.getElementById('pre-title').innerText = item.chapter;
-        gal.innerHTML = item.imgs.map((src, i) => `
-            <div class="preview-img-box">
-                <img src="${src}" class="preview-img">
-                <a href="${src}" target="_blank" class="btn btn-blue" style="margin-top:10px; width:100%; text-align:center;">Open Full Image</a>
-            </div>
-        `).join('');
+        gal.innerHTML = item.imgs.map(src => `<div class="preview-img-box"><img src="${src}" class="preview-img"></div>`).join('');
         openModal('pre-modal');
     }
 
-    function delNote(id) { if(confirm("Delete link? (Image stays on GitHub)")) { db = db.filter(x => x.id !== id); localStorage.setItem("v_db", JSON.stringify(db)); render(); } }
+    function delNote(id) { if(confirm("Delete?")) { db = db.filter(x => x.id !== id); localStorage.setItem("v_db", JSON.stringify(db)); render(); } }
 </script>
 </body>
 </html>
