@@ -13,8 +13,8 @@
 
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
 
-        /* Auth Screens */
-        #gate, #exit-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; text-align: center; }
+        /* Auth Screen */
+        #gate { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; text-align: center; }
         .lock-box { padding: 15px; width: 280px; border: 1px solid var(--border); border-radius: 12px; background: #000; color: white; margin-bottom: 20px; outline: none; }
 
         /* Header */
@@ -26,7 +26,7 @@
         .controls { max-width: 900px; margin: 20px auto; padding: 0 20px; }
         nav { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
         .sub-pill { padding: 10px 22px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text-dim); cursor: pointer; transition: var(--transition); white-space: nowrap; }
-        .sub-pill.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+        .sub-pill.active { background: var(--accent); color: white; border-color: var(--accent); }
         
         #search-bar { width: 100%; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; color: white; font-size: 16px; outline: none; margin-bottom: 20px; box-sizing: border-box; }
 
@@ -40,23 +40,16 @@
         .modal-ui { background: var(--card); padding: 30px; border-radius: 20px; width: 340px; border: 1px solid var(--border); }
         .modal-ui input, .modal-ui select { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; }
 
-        /* Notification Panel */
+        /* Notification Panel (Activity Hub) */
         #notif-overlay { position: fixed; right: -400px; top: 0; width: 320px; height: 100%; background: var(--card); border-left: 1px solid var(--border); z-index: 5000; transition: var(--transition); padding: 20px; display: flex; flex-direction: column; }
         #notif-overlay.open { right: 0; }
-        .notif-msg { background: #000; padding: 10px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid var(--accent); position: relative; }
+        .notif-msg { background: #000; padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 3px solid var(--accent); }
 
-        /* Gallery */
-        .gallery-wrap { display: flex; flex-direction: column; gap: 20px; overflow-y: auto; width: 90%; max-width: 800px; padding: 20px; background: var(--card); border-radius: 20px; max-height: 80vh; }
-        .preview-img-box { text-align: center; margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
-        .preview-img { width: 100%; border-radius: 10px; border: 1px solid var(--border); }
-
-        /* Buttons */
-        .btn { padding: 8px 15px; border-radius: 8px; border: 0; cursor: pointer; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; }
-        .btn-blue { background: var(--accent); color: white; }
-        .btn-red { background: var(--danger); color: white; }
-        .fab { position: fixed; width: 60px; height: 60px; border-radius: 50%; border: 0; color: white; font-size: 24px; cursor: pointer; z-index: 2000; display: flex; align-items: center; justify-content: center; }
+        /* FABs */
+        .fab { position: fixed; width: 55px; height: 55px; border-radius: 50%; border: 0; color: white; font-size: 20px; cursor: pointer; z-index: 2000; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
         .add-fab { bottom: 30px; left: 30px; background: var(--accent); }
         .notif-fab { bottom: 30px; right: 30px; background: #222; border: 1px solid var(--border); }
+        .settings-fab { bottom: 100px; right: 30px; background: #222; border: 1px solid var(--border); font-size: 18px; }
     </style>
 </head>
 <body>
@@ -64,7 +57,7 @@
 <div id="gate">
     <div class="brand" style="font-size: 3rem;">VAULT<span>.10</span></div>
     <input type="password" id="pass" class="lock-box" placeholder="Access Key">
-    <button onclick="login()" class="btn-blue" style="width:280px; padding:15px; border-radius:12px;">Authenticate</button>
+    <button onclick="login()" class="btn-blue" style="width:280px; padding:15px; border:0; border-radius:12px; color:white; font-weight:bold; cursor:pointer;">Authenticate</button>
 </div>
 
 <header>
@@ -89,78 +82,115 @@
 
 <div id="main-grid" class="grid"></div>
 
+<div id="settings-modal" class="modal">
+    <div class="modal-ui">
+        <h3>Cloud Settings</h3>
+        <p style="font-size:11px; color:var(--text-dim);">Enter your GitHub details. These are saved ONLY in your browser.</p>
+        <input type="password" id="set-token" placeholder="GitHub Token (ghp_...)">
+        <input type="text" id="set-user" placeholder="GitHub Username">
+        <input type="text" id="set-repo" placeholder="Repository Name">
+        <button onclick="saveSettings()" class="btn-blue" style="width:100%; padding:12px; border:0; border-radius:8px; margin-top:10px;">Save Config</button>
+        <button onclick="closeModal('settings-modal')" style="width:100%; background:none; border:0; color:var(--text-dim); margin-top:10px;">Close</button>
+    </div>
+</div>
+
 <div id="up-modal" class="modal">
     <div class="modal-ui">
-        <h3 style="margin-top:0;">Upload Notes</h3>
+        <h3>Upload Notes</h3>
         <select id="f-sub"><option>Maths</option><option>Science</option><option>SST</option><option>Hindi</option><option>English</option></select>
-        <input type="text" id="f-chap" placeholder="Chapter Name (Exact name to group)">
+        <input type="text" id="f-chap" placeholder="Chapter Name">
         <input type="file" id="f-files" multiple accept="image/*">
-        <button onclick="pushNotes()" id="up-btn" class="btn-blue" style="width:100%; padding:12px; margin-top:10px;">Push to Cloud</button>
-        <button onclick="closeModal('up-modal')" style="width:100%; background:none; border:0; color:var(--text-dim); margin-top:10px; cursor:pointer;">Cancel</button>
+        <button onclick="pushNotes()" id="up-btn" class="btn-blue" style="width:100%; padding:12px; border:0; border-radius:8px;">Push to Cloud</button>
+        <button onclick="closeModal('up-modal')" style="width:100%; background:none; border:0; color:var(--text-dim); margin-top:10px;">Cancel</button>
     </div>
 </div>
 
 <div id="pre-modal" class="modal">
     <div style="width:90%; max-width:800px; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <h3 id="pre-title" style="margin:0;">Preview</h3>
+        <h3 id="pre-title">Preview</h3>
         <button onclick="closeModal('pre-modal')" style="background:none; border:0; color:white; font-size:30px; cursor:pointer;">&times;</button>
     </div>
-    <div id="gallery" class="gallery-wrap"></div>
+    <div id="gallery" class="gallery-wrap" style="overflow-y:auto; max-height:80vh; width:90%; display:flex; flex-direction:column; gap:20px;"></div>
+</div>
+
+<div id="notif-overlay">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h3>Activity Hub</h3>
+        <button onclick="toggleNotif(false)" style="background:none; border:0; color:white; font-size:25px;">&times;</button>
+    </div>
+    <div style="margin-bottom:15px;">
+        <input type="text" id="chat-input" class="lock-box" style="width:100%; font-size:12px; box-sizing:border-box;" placeholder="Message friends...">
+        <button onclick="sendChat()" class="btn-blue" style="width:100%; padding:8px; border:0; border-radius:8px;">Broadcast</button>
+    </div>
+    <div id="notif-list" style="overflow-y:auto; flex:1;"></div>
 </div>
 
 <button class="fab add-fab" onclick="openModal('up-modal')">+</button>
+<button class="fab notif-fab" onclick="toggleNotif(true)">🔔</button>
+<button class="fab settings-fab" onclick="openModal('settings-modal')">⚙️</button>
 
 <script>
-    // --- GITHUB CONFIG ---
-    const P1 = "ghp_your_first_half"; // Split token to hide from bots
-    const P2 = "your_second_half";
-    const GITHUB_TOKEN = P1 + P2;
-    const REPO_OWNER = "YOUR_USERNAME";
-    const REPO_NAME = "YOUR_REPO";
-
     const keys = { "U2lkIzl4WjI=": "Siddharth", "VGVqKjRrTDc=": "Tejeshwar", "QWp5JjFtUDU=": "Ajay" };
-    let db = []; 
-    let activeSub = "All";
+    let db = []; let chats = []; let activeSub = "All";
 
+    function saveSettings() {
+        localStorage.setItem("gh_token", document.getElementById('set-token').value);
+        localStorage.setItem("gh_user", document.getElementById('set-user').value);
+        localStorage.setItem("gh_repo", document.getElementById('set-repo').value);
+        alert("Settings Saved Locally!");
+        location.reload();
+    }
+
+    async function gh(path, method = "GET", body = null) {
+        const token = localStorage.getItem("gh_token");
+        const user = localStorage.getItem("gh_user");
+        const repo = localStorage.getItem("gh_repo");
+        if(!token || !user || !repo) return { ok: false };
+
+        const url = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
+        const headers = { "Authorization": `token ${token}`, "Accept": "application/vnd.github.v3+json" };
+        return fetch(url, { method, headers, body: body ? JSON.stringify(body) : null });
+    }
+
+    // Auth Logic
     function login() {
         const p = document.getElementById('pass').value.trim();
         const enc = btoa(p);
         if(keys[enc]) { localStorage.setItem("v_user", keys[enc]); location.reload(); }
-        else { alert("Wrong Key!"); }
+        else { alert("Wrong Access Key!"); }
     }
-
     function logout() { localStorage.removeItem("v_user"); location.reload(); }
 
     window.onload = async () => {
         const u = localStorage.getItem("v_user");
         if(u) { 
             document.getElementById('gate').style.display = 'none'; 
-            document.getElementById('u-name').innerText = u; 
+            document.getElementById('u-name').innerText = u;
+            // Load current settings into inputs
+            document.getElementById('set-token').value = localStorage.getItem("gh_token") || "";
+            document.getElementById('set-user').value = localStorage.getItem("gh_user") || "";
+            document.getElementById('set-repo').value = localStorage.getItem("gh_repo") || "";
             await sync();
         }
     };
 
-    async function gh(path, method = "GET", body = null) {
-        const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`;
-        const headers = { "Authorization": `token ${GITHUB_TOKEN}`, "Accept": "application/vnd.github.v3+json" };
-        return fetch(url, { method, headers, body: body ? JSON.stringify(body) : null });
-    }
-
     async function sync() {
-        try {
-            const res = await gh("data");
-            if (res.ok) {
-                const files = await res.json();
-                db = [];
-                for (let f of files) {
-                    if (f.name.endsWith('.json')) {
-                        const d = await (await fetch(f.download_url)).json();
-                        db.push(d);
-                    }
-                }
-                render();
-            }
-        } catch (e) { console.error(e); }
+        const res = await gh("data");
+        if (res.ok) {
+            const files = await res.json();
+            db = [];
+            for (let f of files) { if (f.name.endsWith('.json')) {
+                const d = await (await fetch(f.download_url)).json();
+                db.push(d);
+            }}
+            render();
+        }
+        const cRes = await gh("hub_chat.json");
+        if (cRes.ok) {
+            const cData = await cRes.json();
+            chats = JSON.parse(atob(cData.content));
+            renderChats();
+        }
     }
 
     async function pushNotes() {
@@ -169,9 +199,9 @@
         const fileInput = document.getElementById('f-files');
         const user = localStorage.getItem("v_user");
 
-        if(!chap || fileInput.files.length === 0) return alert("Missing info!");
+        if(!chap || fileInput.files.length === 0) return alert("Fill everything!");
         const btn = document.getElementById('up-btn');
-        btn.innerText = "Uploading..."; btn.disabled = true;
+        btn.innerText = "Pushing..."; btn.disabled = true;
 
         const imgs = await Promise.all(Array.from(fileInput.files).map(f => new Promise(r => {
             const rd = new FileReader(); rd.onload = e => r(e.target.result); rd.readAsDataURL(f);
@@ -189,62 +219,81 @@
         }
 
         data.notes.push({ author: user, time: new Date().toLocaleString(), pages: imgs });
+        await gh(fileName, "PUT", { message: `Cloud Update: ${chap}`, content: btoa(JSON.stringify(data)), sha: sha });
+        
+        // Auto-notify Hub
+        chats.unshift({ user: "SYSTEM", text: `${user} just uploaded ${chap} notes!`, time: new Date().toLocaleTimeString() });
+        const cCheck = await gh("hub_chat.json");
+        let cSha = cCheck.ok ? (await cCheck.json()).sha : null;
+        await gh("hub_chat.json", "PUT", { message: "Hub Update", content: btoa(JSON.stringify(chats)), sha: cSha });
 
-        const push = await gh(fileName, "PUT", {
-            message: `Upload ${chap} by ${user}`,
-            content: btoa(JSON.stringify(data)),
-            sha: sha
-        });
+        location.reload();
+    }
 
-        if(push.ok) { alert("Success!"); location.reload(); }
-        else { alert("Error! Check Console."); btn.disabled = false; }
+    async function sendChat() {
+        const input = document.getElementById('chat-input');
+        if(!input.value.trim()) return;
+        const user = localStorage.getItem("v_user");
+        
+        chats.unshift({ user: user, text: input.value, time: new Date().toLocaleTimeString() });
+        if(chats.length > 30) chats.pop();
+
+        const cCheck = await gh("hub_chat.json");
+        let cSha = cCheck.ok ? (await cCheck.json()).sha : null;
+        await gh("hub_chat.json", "PUT", { message: "Chat Sent", content: btoa(JSON.stringify(chats)), sha: cSha });
+        
+        input.value = "";
+        renderChats();
     }
 
     function render() {
         const grid = document.getElementById('main-grid');
-        const q = document.getElementById('search-bar').value.toLowerCase();
         grid.innerHTML = "";
-
-        db.filter(i => (activeSub === "All" || i.subject === activeSub) && i.chapter.toLowerCase().includes(q))
+        db.filter(i => (activeSub === "All" || i.subject === activeSub))
         .forEach(item => {
-            const authors = [...new Set(item.notes.map(n => n.author))].join(", ");
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
                 <div style="font-size:10px; color:var(--accent); font-weight:bold;">${item.subject.toUpperCase()}</div>
                 <div style="font-size:1.2rem; font-weight:bold; margin: 10px 0;">${item.chapter}</div>
-                <div style="font-size:11px; color:var(--text-dim); margin-bottom:15px;">By: ${authors}</div>
-                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #222; padding-top:12px;">
-                    <span style="font-size:11px; color:var(--text-dim)">${item.notes.length} Contributions</span>
-                    <button class="btn btn-blue" onclick="viewVault('${item.chapter}')">Open Vault</button>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:11px; color:var(--text-dim)">${item.notes.length} People</span>
+                    <button class="btn btn-blue" style="padding:8px 15px; border-radius:8px; border:0; cursor:pointer; color:white;" onclick="viewVault('${item.chapter}')">Open</button>
                 </div>
             `;
             grid.appendChild(card);
         });
     }
 
-    function viewVault(chapName) {
-        const item = db.find(d => d.chapter === chapName);
+    function renderChats() {
+        document.getElementById('notif-list').innerHTML = chats.map(c => `
+            <div class="notif-msg">
+                <strong style="font-size:11px; color:var(--accent);">${c.user}</strong>
+                <div style="font-size:13px; margin:4px 0;">${c.text}</div>
+                <div style="font-size:9px; opacity:0.4;">${c.time}</div>
+            </div>
+        `).join('');
+    }
+
+    function viewVault(name) {
+        const item = db.find(d => d.chapter === name);
         const gal = document.getElementById('gallery');
-        document.getElementById('pre-title').innerText = chapName;
+        document.getElementById('pre-title').innerText = name;
         gal.innerHTML = item.notes.map(n => `
-            <div style="color:var(--accent); font-weight:bold; margin-bottom:10px; border-left:3px solid var(--accent); padding-left:10px;">Uploaded by ${n.author} (${n.time})</div>
-            ${n.pages.map((p, i) => `
-                <div class="preview-img-box">
-                    <img src="${p}" class="preview-img">
-                    <a href="${p}" download="${chapName}_${n.author}_P${i+1}.png" class="btn btn-blue" style="margin-top:10px;">Download Page ${i+1}</a>
-                </div>
-            `).join('')}
+            <div style="padding:10px; background:#000; border-radius:10px; border:1px solid #222;">
+                <div style="color:var(--accent); font-size:12px; margin-bottom:10px;">Contributor: ${n.author}</div>
+                ${n.pages.map(p => `<img src="${p}" style="width:100%; border-radius:8px; margin-bottom:10px;">`).join('')}
+            </div>
         `).join('');
         openModal('pre-modal');
     }
 
-    function setSub(s, btn) {
-        activeSub = s;
+    function setSub(s, b) { 
+        activeSub = s; 
         document.querySelectorAll('.sub-pill').forEach(x => x.classList.remove('active'));
-        btn.classList.add('active');
-        render();
+        b.classList.add('active'); render(); 
     }
+    function toggleNotif(s) { document.getElementById('notif-overlay').classList.toggle('open', s); }
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 </script>
