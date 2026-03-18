@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vault.10 | Private Study Cloud</title>
+    <title>Vault.10 | Private Study Platform</title>
     <style>
         :root {
             --bg: #050505; --card: #111111; --accent: #3b82f6;
@@ -49,7 +49,7 @@
         /* Gallery */
         .gallery-wrap { display: flex; gap: 20px; overflow-x: auto; width: 95%; padding: 20px; scroll-snap-type: x mandatory; }
         .preview-img-box { flex: 0 0 auto; scroll-snap-align: center; text-align: center; width: 280px; }
-        .preview-img { width: 100%; border-radius: 10px; border: 1px solid var(--border); }
+        .preview-img { width: 100%; border-radius: 10px; border: 1px solid var(--border); max-height: 400px; object-fit: contain; background: #000; }
 
         /* Buttons */
         .btn { padding: 8px 15px; border-radius: 8px; border: 0; cursor: pointer; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; }
@@ -162,26 +162,35 @@
         const user = localStorage.getItem("v_user");
 
         if(!chap || fileInput.files.length === 0) return alert("Fill all details!");
-        document.getElementById('up-btn').innerText = "Processing Files...";
-
-        const imagePromises = Array.from(fileInput.files).map(file => {
-            return new Promise(r => {
-                const reader = new FileReader();
-                reader.onload = (e) => r(e.target.result);
-                reader.readAsDataURL(file);
-            });
-        });
-
-        const images = await Promise.all(imagePromises);
-        db.unshift({ id: Date.now(), subject: sub, chapter: chap, author: user, imgs: images });
-        localStorage.setItem("v_db", JSON.stringify(db));
         
-        chats.unshift({ user: user, text: `Uploaded: ${chap}`, time: new Date().toLocaleTimeString() });
-        localStorage.setItem("v_notifs", JSON.stringify(chats));
+        try {
+            document.getElementById('up-btn').innerText = "Processing Files...";
 
-        closeModal('up-modal');
-        document.getElementById('up-btn').innerText = "Push to Cloud";
-        render();
+            const imagePromises = Array.from(fileInput.files).map(file => {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            });
+
+            const images = await Promise.all(imagePromises);
+            db.unshift({ id: Date.now(), subject: sub, chapter: chap, author: user, imgs: images });
+            
+            // Check storage limit
+            localStorage.setItem("v_db", JSON.stringify(db));
+            
+            chats.unshift({ user: user, text: `Uploaded: ${chap}`, time: new Date().toLocaleTimeString() });
+            localStorage.setItem("v_notifs", JSON.stringify(chats));
+
+            closeModal('up-modal');
+            render();
+        } catch (e) {
+            alert("Storage full! Try deleting old notes or uploading fewer/smaller images.");
+        } finally {
+            document.getElementById('up-btn').innerText = "Push to Cloud";
+        }
     }
 
     function render() {
@@ -190,7 +199,6 @@
         const user = localStorage.getItem("v_user");
         grid.innerHTML = "";
 
-        // Filter database
         const filtered = db.filter(i => (activeSub === "All" || i.subject === activeSub) && i.chapter.toLowerCase().includes(q));
 
         // Group by Chapter Name
@@ -201,7 +209,6 @@
             return acc;
         }, {});
 
-        // Build Cards
         for (const chapterName in grouped) {
             const chapterItems = grouped[chapterName];
             const subject = chapterItems[0].subject;
@@ -209,7 +216,6 @@
             const card = document.createElement('div');
             card.className = 'card';
             
-            // Sub-sections for each contributor within this chapter
             const authorRows = chapterItems.map(item => `
                 <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #222; padding-top:10px; margin-top:10px;">
                     <span style="font-size:11px; color:var(--text-dim)">By ${item.author}</span>
@@ -231,14 +237,24 @@
 
     function openGallery(id) {
         const item = db.find(x => x.id === id);
+        if(!item) return;
+        
         const gal = document.getElementById('gallery');
         document.getElementById('pre-title').innerText = item.chapter;
-        gal.innerHTML = item.imgs.map((src, i) => `
-            <div class="preview-img-box">
-                <img src="${src}" class="preview-img">
-                <a href="${src}" download="${item.chapter}_Page${i+1}.png" class="btn btn-blue" style="margin-top:10px; width:100%; box-sizing:border-box; text-align:center;">Download Page ${i+1}</a>
-            </div>
-        `).join('');
+        
+        gal.innerHTML = item.imgs.map((src, i) => {
+            // Fix: Ensuring filename is safe and button triggers download correctly
+            const fileName = `${item.chapter.replace(/\s+/g, '_')}_Page_${i+1}.png`;
+            return `
+                <div class="preview-img-box">
+                    <img src="${src}" class="preview-img" onerror="this.src='https://via.placeholder.com/300?text=Error+Loading+Image'">
+                    <div style="margin-top:10px;">
+                        <a href="${src}" download="${fileName}" class="btn btn-blue" style="width:100%; box-sizing:border-box; text-align:center;">Download Page ${i+1}</a>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
         openModal('pre-modal');
     }
 
