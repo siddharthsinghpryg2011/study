@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>?? Secure Study Vault</title>
+    <style>
+        /* CSS Variables for Smooth Theme Switching */
+        :root {
+            --p: #2563eb; --s: #22c55e; --d: #ef4444;
+            --bg: #f1f5f9; --card: #ffffff; --text: #1e293b;
+            --border: #e2e8f0; --nav-bg: #ffffff;
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f172a; --card: #1e293b; --text: #f1f5f9;
+            --border: #334155; --nav-bg: #1e293b;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            margin: 0;
+            color: var(--text);
+            transition: var(--transition);
+        }
+
+        /* Security Overlay Animation */
+        #_0xGate {
+            position: fixed; inset: 0; background: var(--card);
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; z-index: 10000; transition: opacity 0.6s ease;
+        }
+
+        ._0xBox {
+            padding: 12px; width: 280px; border: 2px solid var(--border);
+            border-radius: 12px; background: var(--card); color: var(--text);
+            outline: none; font-size: 16px; text-align: center; margin-bottom: 20px;
+        }
+
+        /* Header & UI */
+        header {
+            background: var(--p); color: white; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        #_0xUserBox { display: flex; flex-direction: column; gap: 4px; }
+        ._0xReset {
+            background: var(--d); color: white; border: none;
+            padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex; gap: 12px; padding: 15px; background: var(--nav-bg);
+            overflow-x: auto; border-bottom: 1px solid var(--border); transition: var(--transition);
+        }
+
+        .sub-btn {
+            padding: 10px 20px; background: var(--card); border: 1px solid var(--border);
+            border-radius: 25px; cursor: pointer; color: var(--text); transition: var(--transition);
+            white-space: nowrap; font-weight: 500;
+        }
+
+        .sub-btn.active { background: var(--p); color: white; border-color: var(--p); transform: scale(1.05); }
+
+        /* Search & Results */
+        .container { max-width: 800px; margin: 30px auto; padding: 0 20px; text-align: center; }
+        #_0xSrch {
+            width: 100%; padding: 16px; font-size: 1rem; border: 2px solid var(--border);
+            border-radius: 14px; background: var(--card); color: var(--text);
+            box-sizing: border-box; transition: var(--transition);
+        }
+
+        ._0xRes {
+            background: var(--card); border-radius: 14px; margin-top: 15px;
+            display: none; overflow: hidden; border: 1px solid var(--border);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); text-align: left;
+        }
+
+        ._0xChapT { background: rgba(0,0,0,0.05); padding: 12px 18px; font-weight: 700; border-bottom: 1px solid var(--border); }
+        .f-row {
+            padding: 14px 25px; display: block; text-decoration: none;
+            color: var(--text); border-bottom: 1px solid var(--border);
+            cursor: pointer; transition: 0.2s;
+        }
+        .f-row:hover { background: var(--p); color: white; padding-left: 35px; }
+
+        /* Theme Toggle Button Animation */
+        .theme-toggle {
+            position: fixed; bottom: 25px; right: 25px; width: 50px; height: 50px;
+            background: var(--p); color: white; border-radius: 50%; border: none;
+            cursor: pointer; font-size: 24px; display: flex; align-items: center;
+            justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease; z-index: 5000;
+        }
+        .theme-toggle:active { transform: scale(0.8) rotate(45deg); }
+    </style>
+</head>
+<body>
+
+<div id="_0xGate">
+    <h2 style="margin-bottom: 10px;">Private Vault</h2>
+    <input type="password" id="_0xPass" class="_0xBox" placeholder="Enter Secret Key...">
+    <button onclick="_0xVerify()" style="padding:12px 40px; background:var(--p); color:white; border:none; border-radius:12px; cursor:pointer; font-weight:bold;">Unlock</button>
+</div>
+
+<header>
+    <div id="_0xUserBox">
+        <div id="_0xDisp" style="font-weight:bold;">Welcome</div>
+        <button id="_0xOut" class="_0xReset" onclick="_0xKillSession()" style="display:none;">Reset Session</button>
+    </div>
+    <button style="background:var(--s); color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer; font-weight:bold;">+ Add Notes</button>
+</header>
+
+<nav>
+    <button class="sub-btn" onclick="_0xSet('Maths', this)">Maths</button>
+    <button class="sub-btn" onclick="_0xSet('Science', this)">Science</button>
+    <button class="sub-btn" onclick="_0xSet('SST', this)">SST</button>
+    <button class="sub-btn" onclick="_0xSet('Hindi', this)">Hindi</button>
+    <button class="sub-btn" onclick="_0xSet('English', this)">English</button>
+</nav>
+
+<div class="container">
+    <h3 id="_0xSubHead" style="opacity: 0.7;">Select Subject</h3>
+    <input type="text" id="_0xSrch" placeholder="Type chapter name..." oninput="_0xLogic()">
+    <div id="_0xDrop" class="_0xRes"></div>
+    <div id="_0xNull" style="display:none; color:var(--d); margin-top:20px;">No such chapter found.</div>
+</div>
+
+<button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">??</button>
+
+<script>
+    // Security Mapping (Hashed)
+    const _0xMap = {
+        "819565691062f689f664a7550f288287532f416c1411516709890479768a3563": "U2lkZGhhcnRo", 
+        "d81439281a1796677936a282f1b6a374668a623f96f13459c03798544d03091e": "VGVqZXshd2Fy", 
+        "847e09642646c05d01249911e0504d60341774849646452f1951590287661858": "QWpheQ=="       
+    };
+
+    const _0xData = {
+        "Maths": ["Number Systems", "Polynomials", "Coordinate Geometry"],
+        "Science": ["Motion", "Force", "Sound", "Gravitation"],
+        "SST": ["French Revolution", "Poverty as a Challenge"],
+        "Hindi": ["Do Bailon Ki Katha"],
+        "English": ["The Fun They Had", "The Road Not Taken"]
+    };
+
+    let _0xUser = ""; let _0xActive = "";
+
+    // Load Session and Theme
+    window.onload = () => {
+        const s = localStorage.getItem("_0x_session");
+        if (s) _0xUnlock(atob(s));
+
+        const t = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", t);
+    };
+
+    // --- Theme Logic ---
+    function toggleTheme() {
+        const current = document.documentElement.getAttribute("data-theme");
+        const next = current === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", next);
+        localStorage.setItem("theme", next);
+    }
+
+    // --- Security Logic ---
+    async function _0xVerify() {
+        const i = document.getElementById('_0xPass').value;
+        const h = await _0xHash(i);
+        if (_0xMap[h]) {
+            const n = atob(_0xMap[h]);
+            localStorage.setItem("_0x_session", _0xMap[h]);
+            _0xUnlock(n);
+        } else { alert("Invalid Key!"); }
+    }
+
+    async function _0xHash(t) {
+        const e = new TextEncoder().encode(t);
+        const b = await crypto.subtle.digest('SHA-256', e);
+        return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join('');
+    }
+
+    function _0xUnlock(n) {
+        _0xUser = n;
+        const g = document.getElementById('_0xGate');
+        g.style.opacity = '0';
+        setTimeout(() => g.style.display = 'none', 600);
+        document.getElementById('_0xDisp').innerHTML = `User: <b>${n}</b>`;
+        document.getElementById('_0xOut').style.display = 'block';
+    }
+
+    function _0xKillSession() {
+        localStorage.removeItem("_0x_session");
+        location.reload();
+    }
+
+    // --- Search Logic ---
+    function _0xSet(s, b) {
+        _0xActive = s;
+        document.querySelectorAll('.sub-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        document.getElementById('_0xSubHead').innerText = s;
+        _0xLogic();
+    }
+
+    function _0xLogic() {
+        const q = document.getElementById('_0xSrch').value.toLowerCase();
+        const d = document.getElementById('_0xDrop');
+        const n = document.getElementById('_0xNull');
+        d.innerHTML = "";
+        if (!_0xActive || !q) { d.style.display = "none"; n.style.display = "none"; return; }
+
+        const f = (_0xData[_0xActive] || []).filter(x => x.toLowerCase().includes(q));
+        if (f.length > 0) {
+            n.style.display = "none"; d.style.display = "block";
+            f.forEach(c => {
+                d.innerHTML += `<div class="_0xChapT">${c}</div>
+                    <div class="f-row" onclick="alert('Opening Siddharth Notes')">Siddharth's Notes</div>
+                    <div class="f-row" onclick="alert('Opening Tejeshwar Notes')">Tejeshwar's Notes</div>
+                    <div class="f-row" onclick="alert('Opening Ajay Notes')">Ajay's Notes</div>`;
+            });
+        } else { d.style.display = "none"; n.style.display = "block"; }
+    }
+</script>
+</body>
+</html>
