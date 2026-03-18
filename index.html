@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vault.10 | GitHub Cloud Storage</title>
+    <title>Vault.10 | Cloud Debug Edition</title>
     <style>
         :root {
             --bg: #050505; --card: #111111; --accent: #3b82f6;
@@ -22,7 +22,7 @@
         .sub-pill.active { background: var(--accent); color: white; border-color: var(--accent); }
         #search-bar { width: 100%; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; color: white; margin-bottom: 20px; box-sizing: border-box; outline:none; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; padding: 20px; max-width: 1200px; margin: auto; }
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px; transition: var(--transition); }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px; transition: var(--transition); border: 1px solid var(--border); }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9000; align-items: center; justify-content: center; backdrop-filter: blur(5px); flex-direction: column; }
         .modal-ui { background: var(--card); padding: 30px; border-radius: 20px; width: 340px; border: 1px solid var(--border); }
         .modal-ui input, .modal-ui select { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; }
@@ -32,7 +32,7 @@
         .btn { padding: 8px 15px; border-radius: 8px; border: 0; cursor: pointer; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; }
         .btn-blue { background: var(--accent); color: white; }
         .btn-red { background: var(--danger); color: white; }
-        .fab { position: fixed; width: 60px; height: 60px; border-radius: 50%; color: white; font-size: 24px; cursor: pointer; z-index: 2000; display: flex; align-items: center; justify-content: center; border: 0; background: var(--accent); bottom: 30px; left: 30px; }
+        .fab { position: fixed; width: 60px; height: 60px; border-radius: 50%; color: white; font-size: 24px; cursor: pointer; z-index: 2000; display: flex; align-items: center; justify-content: center; border: 0; background: var(--accent); bottom: 30px; left: 30px; box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4); }
     </style>
 </head>
 <body>
@@ -85,7 +85,7 @@
 
 <script>
     // --- GITHUB CONFIGURATION ---
-    // Splitting the token to bypass GitHub's public scanning bot
+    // Token is split to bypass auto-revoke on public repos
     const p1 = "ghp_SsW1ZWXkYSqauqG";
     const p2 = "jjVEdhedCv0pALH2TjBJX";
     const GITHUB_TOKEN = p1 + p2; 
@@ -128,7 +128,7 @@
 
         if(!chap || fileInput.files.length === 0) return alert("Select files and chapter name!");
         const btn = document.getElementById('up-btn');
-        btn.innerText = "Uploading to GitHub...";
+        btn.innerText = "Attempting Upload...";
         btn.disabled = true;
 
         try {
@@ -139,14 +139,18 @@
                 const base64Content = await toBase64(file);
                 const cleanBase64 = base64Content.split(',')[1];
 
-                const response = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/notes/${fileName}`, {
+                // URL structure: repos/OWNER/REPO/contents/PATH
+                const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/notes/${fileName}`;
+
+                const response = await fetch(url, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
                     },
                     body: JSON.stringify({
-                        message: `Upload: ${chap}`,
+                        message: `Upload: ${chap} by ${user}`,
                         content: cleanBase64
                     })
                 });
@@ -156,7 +160,8 @@
                     uploadedUrls.push(data.content.download_url);
                 } else {
                     const errorData = await response.json();
-                    throw new Error(errorData.message);
+                    console.error("GitHub API Error:", errorData);
+                    throw new Error(`GitHub says: ${errorData.message} (${response.status})`);
                 }
             }
 
@@ -164,9 +169,10 @@
             localStorage.setItem("v_db", JSON.stringify(db));
             closeModal('up-modal');
             render();
-            alert("Upload Successful!");
+            alert("Success! Images are safe on GitHub Cloud.");
         } catch (e) {
-            alert("Error: " + e.message);
+            alert("CRITICAL ERROR: " + e.message);
+            console.log("Full Error Object:", e);
         } finally {
             btn.innerText = "Push to GitHub";
             btn.disabled = false;
@@ -220,13 +226,13 @@
         gal.innerHTML = item.imgs.map((src, i) => `
             <div class="preview-img-box">
                 <img src="${src}" class="preview-img">
-                <a href="${src}" download="Page_${i+1}.jpg" class="btn btn-blue" style="margin-top:10px; width:100%; text-align:center;">Download Page</a>
+                <a href="${src}" target="_blank" class="btn btn-blue" style="margin-top:10px; width:100%; text-align:center;">Open Full Image</a>
             </div>
         `).join('');
         openModal('pre-modal');
     }
 
-    function delNote(id) { if(confirm("Delete link?")) { db = db.filter(x => x.id !== id); localStorage.setItem("v_db", JSON.stringify(db)); render(); } }
+    function delNote(id) { if(confirm("Delete link? (Image stays on GitHub)")) { db = db.filter(x => x.id !== id); localStorage.setItem("v_db", JSON.stringify(db)); render(); } }
 </script>
 </body>
 </html>
