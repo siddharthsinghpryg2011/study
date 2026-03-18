@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Vault | Simple & Fast</title>
+    <title>Study Vault | Fixed & Animated</title>
     <style>
         :root {
             --p: #2563eb; --s: #22c55e; --d: #ef4444;
             --bg: #f8fafc; --card: #ffffff; --text: #1e293b;
-            --border: #e2e8f0; --transition: all 0.4s ease;
+            --border: #e2e8f0; --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         [data-theme="dark"] {
@@ -22,41 +22,47 @@
         .in-box { padding: 12px; width: 260px; border: 2px solid var(--border); border-radius: 12px; background: var(--card); color: var(--text); outline: none; text-align: center; margin-bottom: 20px; }
 
         /* Header */
-        header { background: var(--p); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        header { background: var(--p); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .logout-btn { background: var(--d); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; margin-top: 5px; }
 
         /* Nav & Content */
         nav { display: flex; gap: 10px; padding: 15px; background: var(--card); overflow-x: auto; border-bottom: 1px solid var(--border); }
         .sub-btn { padding: 8px 20px; background: var(--bg); border: 1px solid var(--border); border-radius: 20px; cursor: pointer; color: var(--text); white-space: nowrap; transition: 0.3s; }
-        .sub-btn.active { background: var(--p); color: white; transform: scale(1.1); }
+        .sub-btn.active { background: var(--p); color: white; transform: scale(1.1); box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); }
 
         .container { max-width: 600px; margin: 30px auto; padding: 0 20px; text-align: center; }
-        #search { width: 100%; padding: 15px; border-radius: 10px; border: 2px solid var(--border); background: var(--card); color: var(--text); }
+        #search { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid var(--border); background: var(--card); color: var(--text); font-size: 16px; outline-color: var(--p); }
 
-        /* Dropdown */
-        .drop { background: var(--card); border-radius: 10px; margin-top: 15px; border: 1px solid var(--border); display: none; text-align: left; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .chap-h { background: rgba(0,0,0,0.05); padding: 10px; font-weight: bold; }
-        .f-row { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid var(--border); display: block; text-decoration: none; color: var(--text); }
-        .f-row:hover { background: var(--p); color: white; padding-left: 30px; transition: 0.3s; }
+        /* Dropdown & Results */
+        .drop { background: var(--card); border-radius: 12px; margin-top: 15px; border: 1px solid var(--border); display: none; text-align: left; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .chap-h { background: rgba(0,0,0,0.05); padding: 12px; font-weight: bold; border-bottom: 1px solid var(--border); }
+        .f-row { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid var(--border); display: block; text-decoration: none; color: var(--text); transition: 0.2s; }
+        .f-row:hover { background: var(--p); color: white; padding-left: 30px; }
+
+        /* Add Notes Modal */
+        #note-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .modal-content { background: var(--card); padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; position: relative; }
+        .modal-content h3 { margin-top: 0; }
+        .modal-content input, .modal-content select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); box-sizing: border-box; }
 
         /* Theme Toggle */
-        .t-btn { position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; border-radius: 50%; border: none; background: var(--p); color: white; cursor: pointer; font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .t-btn { position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; border-radius: 50%; border: none; background: var(--p); color: white; cursor: pointer; font-size: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 5000; }
     </style>
 </head>
 <body>
 
 <div id="gate">
-    <h2>Enter Private Key</h2>
-    <input type="password" id="pass" class="in-box" placeholder="Your Password...">
-    <button onclick="login()" style="padding:10px 30px; background:var(--p); color:white; border:none; border-radius:8px; cursor:pointer;">Verify</button>
+    <h2>Vault Access</h2>
+    <input type="password" id="pass" class="in-box" placeholder="Password...">
+    <button onclick="login()" style="padding:12px 35px; background:var(--p); color:white; border:none; border-radius:10px; cursor:pointer; font-weight:bold;">Unlock</button>
 </div>
 
 <header>
     <div>
-        <div id="u-name" style="font-weight:bold;">Welcome</div>
-        <button id="l-out" class="logout-btn" onclick="logout()" style="display:none;">Logout / Reset</button>
+        <div id="u-name" style="font-weight:bold; font-size: 1.1rem;">Welcome</div>
+        <button id="l-out" class="logout-btn" onclick="logout()" style="display:none;">Reset Session</button>
     </div>
-    <button style="background:var(--s); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer;">+ Add Notes</button>
+    <button onclick="toggleModal(true)" style="background:var(--s); color:white; border:none; padding:10px 18px; border-radius:10px; cursor:pointer; font-weight:bold;">+ Add Notes</button>
 </header>
 
 <nav>
@@ -68,23 +74,43 @@
 </nav>
 
 <div class="container">
-    <h3 id="cur-sub">Select Subject</h3>
-    <input type="text" id="search" placeholder="Search chapter..." oninput="doSearch()">
+    <h3 id="cur-sub" style="opacity: 0.6;">Select a Subject</h3>
+    <input type="text" id="search" placeholder="Type chapter name..." oninput="doSearch()">
+    
     <div id="drop" class="drop"></div>
+    <div id="no-chap" style="display:none; color:var(--d); margin-top:25px; font-weight:bold;">❌ No such chapter found!</div>
+</div>
+
+<div id="note-modal">
+    <div class="modal-content">
+        <h3>Upload Chapter Note</h3>
+        <label>Subject:</label>
+        <select id="up-sub">
+            <option>Maths</option><option>Science</option><option>SST</option><option>Hindi</option><option>English</option>
+        </select>
+        <label>Chapter Name:</label>
+        <input type="text" id="up-chap" placeholder="e.g. Polynomials">
+        <label>Select Photo:</label>
+        <input type="file" id="up-file" accept="image/*">
+        <button onclick="saveToGitHub()" style="width:100%; background:var(--p); color:white; border:none; padding:12px; border-radius:8px; margin-top:10px; cursor:pointer; font-weight:bold;">Upload to GitHub</button>
+        <button onclick="toggleModal(false)" style="width:100%; background:none; border:none; color:var(--text); margin-top:10px; cursor:pointer; opacity:0.6;">Close</button>
+    </div>
 </div>
 
 <button class="t-btn" onclick="toggleT()">🌓</button>
 
 <script>
-    // Simple Base64 Map (Password -> Name)
-    // Siddharth: Sid#9xZ2  |  Tejeshwar: Tej*4kL7  |  Ajay: Ajy&1mP5
-    const keys = {
-        "U2lkIzl4WjI=": "Siddharth",
-        "VGVqKjRrTDc=": "Tejeshwar",
-        "QWp5JjFtUDU=": "Ajay"
-    };
-
+    // Base64 Passwords: Sid#9xZ2, Tej*4kL7, Ajy&1mP5
+    const keys = { "U2lkIzl4WjI=": "Siddharth", "VGVqKjRrTDc=": "Tejeshwar", "QWp5JjFtUDU=": "Ajay" };
     let activeS = "";
+
+    const data = {
+        "Maths": ["Polynomials", "Number Systems", "Quadrilaterals"],
+        "Science": ["Motion", "Force", "Sound", "Gravitation", "Matter in Our Surroundings"],
+        "SST": ["French Revolution", "Poverty as a Challenge"],
+        "Hindi": ["Do Bailon Ki Katha"],
+        "English": ["The Fun They Had", "The Road Not Taken"]
+    };
 
     window.onload = () => {
         const s = localStorage.getItem("v_user");
@@ -94,13 +120,11 @@
 
     function login() {
         const p = document.getElementById('pass').value;
-        const encoded = btoa(p); // Password ko Base64 mein badlo
+        const encoded = btoa(p);
         if (keys[encoded]) {
             localStorage.setItem("v_user", keys[encoded]);
             unlock(keys[encoded]);
-        } else {
-            alert("Invalid Password!");
-        }
+        } else { alert("Invalid Password!"); }
     }
 
     function unlock(n) {
@@ -109,10 +133,7 @@
         document.getElementById('l-out').style.display = 'block';
     }
 
-    function logout() {
-        localStorage.removeItem("v_user");
-        location.reload();
-    }
+    function logout() { localStorage.removeItem("v_user"); location.reload(); }
 
     function toggleT(forceDark = false) {
         let theme = document.documentElement.getAttribute("data-theme");
@@ -121,42 +142,52 @@
             localStorage.setItem("v_theme", "light");
         } else {
             document.documentElement.setAttribute("data-theme", "dark");
-            localStorage.setItem("v_theme", "dark");
+            localStorage.setAttribute("v_theme", "dark");
         }
     }
 
-    const data = {
-        "Maths": ["Polynomials", "Number Systems"],
-        "Science": ["Motion", "Force", "Sound"],
-        "SST": ["French Revolution", "Poverty"],
-        "Hindi": ["Do Bailon Ki Katha"],
-        "English": ["The Road Not Taken"]
-    };
+    function toggleModal(show) { document.getElementById('note-modal').style.display = show ? 'flex' : 'none'; }
 
     function setSub(s, b) {
         activeS = s;
         document.querySelectorAll('.sub-btn').forEach(x => x.classList.remove('active'));
         b.classList.add('active');
-        document.getElementById('cur-sub').innerText = s;
+        document.getElementById('cur-sub').innerText = "Subject: " + s;
+        document.getElementById('search').value = "";
         doSearch();
     }
 
     function doSearch() {
         const q = document.getElementById('search').value.toLowerCase();
         const d = document.getElementById('drop');
+        const err = document.getElementById('no-chap');
         d.innerHTML = "";
-        if (!activeS || !q) { d.style.display = "none"; return; }
+        
+        if (!activeS || !q) { d.style.display = "none"; err.style.display = "none"; return; }
 
         const filtered = (data[activeS] || []).filter(x => x.toLowerCase().includes(q));
+        
         if (filtered.length > 0) {
             d.style.display = "block";
+            err.style.display = "none";
             filtered.forEach(c => {
                 d.innerHTML += `<div class="chap-h">${c}</div>
-                    <div class="f-row" onclick="alert('Opening Siddharth')">Siddharth</div>
-                    <div class="f-row" onclick="alert('Opening Tejeshwar')">Tejeshwar</div>
-                    <div class="f-row" onclick="alert('Opening Ajay')">Ajay</div>`;
+                    <div class="f-row" onclick="alert('Opening Siddharth')">📄 Siddharth's Notes</div>
+                    <div class="f-row" onclick="alert('Opening Tejeshwar')">📄 Tejeshwar's Notes</div>
+                    <div class="f-row" onclick="alert('Opening Ajay')">📄 Ajay's Notes</div>`;
             });
-        } else { d.style.display = "none"; }
+        } else {
+            d.style.display = "none";
+            err.style.display = "block"; // This shows the 'No such chapter found' message
+        }
+    }
+
+    function saveToGitHub() {
+        const chap = document.getElementById('up-chap').value;
+        const file = document.getElementById('up-file').files[0];
+        if(!chap || !file) { alert("Please fill all details!"); return; }
+        alert(`Uploading ${file.name} for ${chap}... Connect your GitHub Token to finish!`);
+        toggleModal(false);
     }
 </script>
 </body>
