@@ -19,7 +19,7 @@
 
         /* Header */
         header { padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(5,5,5,0.8); backdrop-filter: blur(15px); position: sticky; top: 0; z-index: 1000; }
-        .brand { font-size: 1.4rem; font-weight: 900; letter-spacing: -1px; }
+        .brand { font-size: 1.4rem; font-weight: 900; letter-spacing: -1px; cursor: pointer; }
         .brand span { color: var(--accent); }
 
         /* Controls */
@@ -33,23 +33,23 @@
         /* Grid */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 20px; max-width: 1200px; margin: auto; }
         .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px; transition: var(--transition); }
-        .card:hover { border-color: var(--accent); transform: translateY(-5px); }
+        .card:hover { border-color: var(--accent); transform: translateY(-3px); }
 
         /* Modals */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9000; align-items: center; justify-content: center; backdrop-filter: blur(5px); flex-direction: column; }
         .modal-ui { background: var(--card); padding: 30px; border-radius: 20px; width: 340px; border: 1px solid var(--border); }
         .modal-ui input, .modal-ui select { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; }
 
-        /* Notification Panel (Activity Hub) */
+        /* Activity Hub */
         #notif-overlay { position: fixed; right: -400px; top: 0; width: 320px; height: 100%; background: var(--card); border-left: 1px solid var(--border); z-index: 5000; transition: var(--transition); padding: 20px; display: flex; flex-direction: column; }
         #notif-overlay.open { right: 0; }
-        .notif-msg { background: #000; padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 3px solid var(--accent); }
+        .notif-msg { background: #000; padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 3px solid var(--accent); position: relative; }
+        .del-msg { position: absolute; top: 10px; right: 10px; color: var(--danger); background: none; border: 0; cursor: pointer; font-size: 16px; opacity: 0.6; }
 
         /* FABs */
         .fab { position: fixed; width: 55px; height: 55px; border-radius: 50%; border: 0; color: white; font-size: 20px; cursor: pointer; z-index: 2000; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
         .add-fab { bottom: 30px; left: 30px; background: var(--accent); }
         .notif-fab { bottom: 30px; right: 30px; background: #222; border: 1px solid var(--border); }
-        .settings-fab { bottom: 100px; right: 30px; background: #222; border: 1px solid var(--border); font-size: 18px; }
     </style>
 </head>
 <body>
@@ -61,16 +61,16 @@
 </div>
 
 <header>
-    <div class="brand">VAULT<span>.10</span></div>
+    <div class="brand" onclick="sync()">VAULT<span>.10</span> <small style="font-size: 10px; opacity: 0.5;">(Refresh)</small></div>
     <div style="text-align: right;">
         <span id="u-name" style="font-weight:bold; display:block;">User</span>
-        <span onclick="logout()" style="color:var(--danger); font-size:11px; cursor:pointer;">Logout</span>
+        <span onclick="openModal('settings-modal')" style="color:var(--accent); font-size:11px; cursor:pointer;">Cloud Config</span>
     </div>
 </header>
 
 <div class="controls">
     <input type="text" id="search-bar" placeholder="Search chapter..." oninput="render()">
-    <nav>
+    <nav id="sub-nav">
         <button class="sub-pill active" onclick="setSub('All', this)">All</button>
         <button class="sub-pill" onclick="setSub('Maths', this)">Maths</button>
         <button class="sub-pill" onclick="setSub('Science', this)">Science</button>
@@ -84,12 +84,11 @@
 
 <div id="settings-modal" class="modal">
     <div class="modal-ui">
-        <h3>Cloud Settings</h3>
-        <p style="font-size:11px; color:var(--text-dim);">Enter your GitHub details. These are saved ONLY in your browser.</p>
-        <input type="password" id="set-token" placeholder="GitHub Token (ghp_...)">
-        <input type="text" id="set-user" placeholder="GitHub Username">
-        <input type="text" id="set-repo" placeholder="Repository Name">
-        <button onclick="saveSettings()" class="btn-blue" style="width:100%; padding:12px; border:0; border-radius:8px; margin-top:10px;">Save Config</button>
+        <h3>Cloud Config</h3>
+        <input type="password" id="set-token" placeholder="GitHub Token">
+        <input type="text" id="set-user" placeholder="Username">
+        <input type="text" id="set-repo" placeholder="Repo Name">
+        <button onclick="saveSettings()" class="btn-blue" style="width:100%; padding:12px; border:0; border-radius:8px;">Save</button>
         <button onclick="closeModal('settings-modal')" style="width:100%; background:none; border:0; color:var(--text-dim); margin-top:10px;">Close</button>
     </div>
 </div>
@@ -108,9 +107,9 @@
 <div id="pre-modal" class="modal">
     <div style="width:90%; max-width:800px; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
         <h3 id="pre-title">Preview</h3>
-        <button onclick="closeModal('pre-modal')" style="background:none; border:0; color:white; font-size:30px; cursor:pointer;">&times;</button>
+        <button onclick="closeModal('pre-modal')" style="background:none; border:0; color:white; font-size:30px;">&times;</button>
     </div>
-    <div id="gallery" class="gallery-wrap" style="overflow-y:auto; max-height:80vh; width:90%; display:flex; flex-direction:column; gap:20px;"></div>
+    <div id="gallery" style="overflow-y:auto; max-height:80vh; width:90%; max-width:800px; display:flex; flex-direction:column; gap:20px;"></div>
 </div>
 
 <div id="notif-overlay">
@@ -120,14 +119,13 @@
     </div>
     <div style="margin-bottom:15px;">
         <input type="text" id="chat-input" class="lock-box" style="width:100%; font-size:12px; box-sizing:border-box;" placeholder="Message friends...">
-        <button onclick="sendChat()" class="btn-blue" style="width:100%; padding:8px; border:0; border-radius:8px;">Broadcast</button>
+        <button onclick="sendChat()" class="btn-blue" style="width:100%; padding:8px; border:0; border-radius:8px;">Send</button>
     </div>
     <div id="notif-list" style="overflow-y:auto; flex:1;"></div>
 </div>
 
 <button class="fab add-fab" onclick="openModal('up-modal')">+</button>
 <button class="fab notif-fab" onclick="toggleNotif(true)">🔔</button>
-<button class="fab settings-fab" onclick="openModal('settings-modal')">⚙️</button>
 
 <script>
     const keys = { "U2lkIzl4WjI=": "Siddharth", "VGVqKjRrTDc=": "Tejeshwar", "QWp5JjFtUDU=": "Ajay" };
@@ -137,40 +135,29 @@
         localStorage.setItem("gh_token", document.getElementById('set-token').value);
         localStorage.setItem("gh_user", document.getElementById('set-user').value);
         localStorage.setItem("gh_repo", document.getElementById('set-repo').value);
-        alert("Settings Saved Locally!");
-        location.reload();
+        alert("Config Saved!"); sync(); closeModal('settings-modal');
     }
 
     async function gh(path, method = "GET", body = null) {
-        const token = localStorage.getItem("gh_token");
-        const user = localStorage.getItem("gh_user");
-        const repo = localStorage.getItem("gh_repo");
-        if(!token || !user || !repo) return { ok: false };
-
-        const url = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
-        const headers = { "Authorization": `token ${token}`, "Accept": "application/vnd.github.v3+json" };
+        const t = localStorage.getItem("gh_token"), u = localStorage.getItem("gh_user"), r = localStorage.getItem("gh_repo");
+        if(!t || !u || !r) return { ok: false };
+        const url = `https://api.github.com/repos/${u}/${r}/contents/${path}`;
+        const headers = { "Authorization": `token ${t}`, "Accept": "application/vnd.github.v3+json" };
         return fetch(url, { method, headers, body: body ? JSON.stringify(body) : null });
     }
 
-    // Auth Logic
     function login() {
         const p = document.getElementById('pass').value.trim();
-        const enc = btoa(p);
-        if(keys[enc]) { localStorage.setItem("v_user", keys[enc]); location.reload(); }
-        else { alert("Wrong Access Key!"); }
+        if(keys[btoa(p)]) { localStorage.setItem("v_user", keys[btoa(p)]); location.reload(); }
+        else alert("Wrong Key!");
     }
-    function logout() { localStorage.removeItem("v_user"); location.reload(); }
 
-    window.onload = async () => {
+    window.onload = () => {
         const u = localStorage.getItem("v_user");
         if(u) { 
             document.getElementById('gate').style.display = 'none'; 
             document.getElementById('u-name').innerText = u;
-            // Load current settings into inputs
-            document.getElementById('set-token').value = localStorage.getItem("gh_token") || "";
-            document.getElementById('set-user').value = localStorage.getItem("gh_user") || "";
-            document.getElementById('set-repo').value = localStorage.getItem("gh_repo") || "";
-            await sync();
+            sync();
         }
     };
 
@@ -179,10 +166,12 @@
         if (res.ok) {
             const files = await res.json();
             db = [];
-            for (let f of files) { if (f.name.endsWith('.json')) {
-                const d = await (await fetch(f.download_url)).json();
-                db.push(d);
-            }}
+            for (let f of files) { 
+                if (f.name.endsWith('.json')) {
+                    const d = await (await fetch(f.download_url + "?t=" + Date.now())).json();
+                    db.push(d);
+                }
+            }
             render();
         }
         const cRes = await gh("hub_chat.json");
@@ -194,62 +183,62 @@
     }
 
     async function pushNotes() {
-        const sub = document.getElementById('f-sub').value;
-        const chap = document.getElementById('f-chap').value.trim();
-        const fileInput = document.getElementById('f-files');
-        const user = localStorage.getItem("v_user");
-
-        if(!chap || fileInput.files.length === 0) return alert("Fill everything!");
-        const btn = document.getElementById('up-btn');
-        btn.innerText = "Pushing..."; btn.disabled = true;
-
-        const imgs = await Promise.all(Array.from(fileInput.files).map(f => new Promise(r => {
-            const rd = new FileReader(); rd.onload = e => r(e.target.result); rd.readAsDataURL(f);
-        })));
-
-        const fileName = `data/${sub}_${chap.replace(/\s+/g, '_')}.json`;
-        let sha = null;
-        let data = { subject: sub, chapter: chap, notes: [] };
-
-        const check = await gh(fileName);
-        if (check.ok) {
-            const existing = await check.json();
-            sha = existing.sha;
-            data = JSON.parse(atob(existing.content));
-        }
-
-        data.notes.push({ author: user, time: new Date().toLocaleString(), pages: imgs });
-        await gh(fileName, "PUT", { message: `Cloud Update: ${chap}`, content: btoa(JSON.stringify(data)), sha: sha });
+        const sub = document.getElementById('f-sub').value, chap = document.getElementById('f-chap').value.trim(), fileInput = document.getElementById('f-files');
+        if(!chap || fileInput.files.length === 0) return alert("Fill all fields!");
         
-        // Auto-notify Hub
-        chats.unshift({ user: "SYSTEM", text: `${user} just uploaded ${chap} notes!`, time: new Date().toLocaleTimeString() });
-        const cCheck = await gh("hub_chat.json");
-        let cSha = cCheck.ok ? (await cCheck.json()).sha : null;
-        await gh("hub_chat.json", "PUT", { message: "Hub Update", content: btoa(JSON.stringify(chats)), sha: cSha });
+        const btn = document.getElementById('up-btn'); btn.innerText = "Uploading..."; btn.disabled = true;
 
-        location.reload();
+        try {
+            const imgs = await Promise.all(Array.from(fileInput.files).map(f => new Promise(r => {
+                const rd = new FileReader(); rd.onload = e => r(e.target.result); rd.readAsDataURL(f);
+            })));
+
+            const fileName = `data/${sub}_${chap.replace(/\s+/g, '_')}.json`;
+            let sha = null, data = { subject: sub, chapter: chap, notes: [] };
+
+            const check = await gh(fileName);
+            if (check.ok) {
+                const existing = await check.json();
+                sha = existing.sha;
+                data = JSON.parse(atob(existing.content));
+            }
+
+            data.notes.push({ author: localStorage.getItem("v_user"), time: new Date().toLocaleString(), pages: imgs });
+            const push = await gh(fileName, "PUT", { message: `Upload ${chap}`, content: btoa(JSON.stringify(data)), sha: sha });
+
+            if(push.ok) {
+                alert("Notes Uploaded Successfully! ✅");
+                closeModal('up-modal'); sync();
+            } else { alert("Upload Failed! ❌ Check Cloud Config."); }
+        } catch(e) { alert("Error: " + e); }
+        btn.innerText = "Push to Cloud"; btn.disabled = false;
     }
 
     async function sendChat() {
-        const input = document.getElementById('chat-input');
+        const input = document.getElementById('chat-input'), user = localStorage.getItem("v_user");
         if(!input.value.trim()) return;
-        const user = localStorage.getItem("v_user");
         
-        chats.unshift({ user: user, text: input.value, time: new Date().toLocaleTimeString() });
-        if(chats.length > 30) chats.pop();
+        chats.unshift({ id: Date.now(), user: user, text: input.value, time: new Date().toLocaleTimeString() });
+        const check = await gh("hub_chat.json");
+        let sha = check.ok ? (await check.json()).sha : null;
+        
+        await gh("hub_chat.json", "PUT", { message: "Chat", content: btoa(JSON.stringify(chats.slice(0,30))), sha: sha });
+        input.value = ""; sync();
+    }
 
-        const cCheck = await gh("hub_chat.json");
-        let cSha = cCheck.ok ? (await cCheck.json()).sha : null;
-        await gh("hub_chat.json", "PUT", { message: "Chat Sent", content: btoa(JSON.stringify(chats)), sha: cSha });
-        
-        input.value = "";
-        renderChats();
+    async function deleteMsg(id) {
+        if(!confirm("Delete this message?")) return;
+        chats = chats.filter(c => c.id !== id);
+        const check = await gh("hub_chat.json");
+        let sha = check.ok ? (await check.json()).sha : null;
+        await gh("hub_chat.json", "PUT", { message: "Del", content: btoa(JSON.stringify(chats)), sha: sha });
+        sync();
     }
 
     function render() {
-        const grid = document.getElementById('main-grid');
+        const grid = document.getElementById('main-grid'), q = document.getElementById('search-bar').value.toLowerCase();
         grid.innerHTML = "";
-        db.filter(i => (activeSub === "All" || i.subject === activeSub))
+        db.filter(i => (activeSub === "All" || i.subject === activeSub) && i.chapter.toLowerCase().includes(q))
         .forEach(item => {
             const card = document.createElement('div');
             card.className = 'card';
@@ -258,21 +247,21 @@
                 <div style="font-size:1.2rem; font-weight:bold; margin: 10px 0;">${item.chapter}</div>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-size:11px; color:var(--text-dim)">${item.notes.length} People</span>
-                    <button class="btn btn-blue" style="padding:8px 15px; border-radius:8px; border:0; cursor:pointer; color:white;" onclick="viewVault('${item.chapter}')">Open</button>
-                </div>
-            `;
+                    <button class="btn-blue" style="border:0; padding:6px 12px; border-radius:6px; cursor:pointer;" onclick="viewVault('${item.chapter}')">Open</button>
+                </div>`;
             grid.appendChild(card);
         });
     }
 
     function renderChats() {
+        const user = localStorage.getItem("v_user");
         document.getElementById('notif-list').innerHTML = chats.map(c => `
             <div class="notif-msg">
                 <strong style="font-size:11px; color:var(--accent);">${c.user}</strong>
                 <div style="font-size:13px; margin:4px 0;">${c.text}</div>
                 <div style="font-size:9px; opacity:0.4;">${c.time}</div>
-            </div>
-        `).join('');
+                ${c.user === user ? `<button class="del-msg" onclick="deleteMsg(${c.id})">&times;</button>` : ''}
+            </div>`).join('');
     }
 
     function viewVault(name) {
@@ -280,22 +269,18 @@
         const gal = document.getElementById('gallery');
         document.getElementById('pre-title').innerText = name;
         gal.innerHTML = item.notes.map(n => `
-            <div style="padding:10px; background:#000; border-radius:10px; border:1px solid #222;">
-                <div style="color:var(--accent); font-size:12px; margin-bottom:10px;">Contributor: ${n.author}</div>
+            <div style="padding:15px; background:#000; border-radius:12px; border:1px solid #222;">
+                <div style="color:var(--accent); font-size:12px; margin-bottom:10px;">By: ${n.author} | ${n.time}</div>
                 ${n.pages.map(p => `<img src="${p}" style="width:100%; border-radius:8px; margin-bottom:10px;">`).join('')}
-            </div>
-        `).join('');
+            </div>`).join('');
         openModal('pre-modal');
     }
 
-    function setSub(s, b) { 
-        activeSub = s; 
-        document.querySelectorAll('.sub-pill').forEach(x => x.classList.remove('active'));
-        b.classList.add('active'); render(); 
-    }
+    function setSub(s, b) { activeSub = s; document.querySelectorAll('.sub-pill').forEach(x => x.classList.remove('active')); b.classList.add('active'); render(); }
     function toggleNotif(s) { document.getElementById('notif-overlay').classList.toggle('open', s); }
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function logout() { localStorage.removeItem("v_user"); location.reload(); }
 </script>
 </body>
 </html>
