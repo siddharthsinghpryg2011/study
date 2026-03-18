@@ -10,37 +10,52 @@
             --text: #ffffff; --text-dim: #94a3b8; --border: #222;
             --danger: #ef4444; --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
         
         header { padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(5,5,5,0.8); backdrop-filter: blur(15px); position: sticky; top: 0; z-index: 1000; }
         .brand { font-size: 1.4rem; font-weight: 900; cursor: pointer; }
         .brand span { color: var(--accent); }
 
         .controls { max-width: 900px; margin: 20px auto; padding: 0 20px; }
-        #search-bar { width: 100%; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; color: white; outline: none; margin-bottom: 20px; box-sizing: border-box; }
+        #search-bar { width: 100%; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; color: white; outline: none; margin-bottom: 20px; box-sizing: border-box; transition: 0.3s; }
+        #search-bar:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
         
         nav { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
         .sub-pill { padding: 10px 22px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text-dim); cursor: pointer; transition: 0.3s; white-space: nowrap; }
         .sub-pill.active { background: var(--accent); color: white; border-color: var(--accent); }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 20px; max-width: 1200px; margin: auto; }
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px; }
+        /* Redesigned Chapter Block */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; padding: 20px; max-width: 1200px; margin: auto; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; transition: 0.3s; }
+        .card-header { padding: 15px 20px; background: #1a1a1a; border-bottom: 1px solid var(--border); font-weight: 800; font-size: 1.1rem; display: flex; justify-content: space-between; }
+        .card-body { padding: 15px 20px; }
+        .note-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; font-size: 13px; }
+        .note-row:last-child { border: 0; }
+        .btn-action { padding: 5px 10px; border-radius: 6px; border: 0; cursor: pointer; font-size: 11px; font-weight: bold; margin-left: 5px; color: white; }
+        .btn-view { background: var(--accent); }
+        .btn-del { background: var(--danger); }
         
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9000; align-items: center; justify-content: center; backdrop-filter: blur(5px); flex-direction: column; }
+        /* Modals */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .modal-ui { background: var(--card); padding: 30px; border-radius: 20px; width: 340px; border: 1px solid var(--border); }
         .modal-ui input, .modal-ui select { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; }
 
-        .fab { position: fixed; width: 55px; height: 55px; border-radius: 50%; border: 0; color: white; cursor: pointer; z-index: 2000; display: flex; align-items: center; justify-content: center; }
-        .logout-fab { bottom: 30px; right: 30px; background: var(--danger); }
+        /* Hub & FABs */
+        #hub-overlay { position: fixed; right: -400px; top: 0; width: 320px; height: 100%; background: var(--card); border-left: 1px solid var(--border); z-index: 5000; transition: var(--transition); padding: 20px; display: flex; flex-direction: column; }
+        #hub-overlay.open { right: 0; }
+        
+        .fab { position: fixed; width: 55px; height: 55px; border-radius: 50%; border: 0; color: white; cursor: pointer; z-index: 2000; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.4); }
         .add-fab { bottom: 30px; left: 30px; background: var(--accent); font-size: 24px; }
+        .hub-fab { bottom: 100px; right: 30px; background: #222; border: 1px solid var(--border); font-size: 20px; }
+        .logout-fab { bottom: 30px; right: 30px; background: var(--danger); }
     </style>
 </head>
 <body>
 
 <div id="gate" style="position:fixed; inset:0; background:var(--bg); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-    <h1 style="font-size:3rem; margin-bottom:20px;">VAULT<span>.10</span></h1>
-    <input type="password" id="pass" class="lock-box" placeholder="Access Key" style="padding:15px; width:280px; border-radius:12px; background:#111; border:1px solid #333; color:white; margin-bottom:20px; outline:none;">
-    <button onclick="login()" style="width:280px; padding:15px; background:var(--accent); color:white; border:0; border-radius:12px; font-weight:bold; cursor:pointer;">Authenticate</button>
+    <h1 style="font-size:3rem;">VAULT<span>.10</span></h1>
+    <input type="password" id="pass" placeholder="Access Key" style="padding:15px; width:280px; border-radius:12px; background:#111; border:1px solid #333; color:white; margin:20px 0; outline:none;">
+    <button onclick="login()" style="width:280px; padding:15px; background:var(--accent); color:white; border:0; border-radius:12px; font-weight:bold; cursor:pointer;">Enter Vault</button>
 </div>
 
 <header>
@@ -52,12 +67,13 @@
 </header>
 
 <div class="controls">
-    <input type="text" id="search-bar" placeholder="Search chapters..." oninput="render()">
+    <input type="text" id="search-bar" placeholder="Search by chapter name..." oninput="render()">
     <nav>
         <button class="sub-pill active" onclick="setSub('All', this)">All</button>
         <button class="sub-pill" onclick="setSub('Maths', this)">Maths</button>
         <button class="sub-pill" onclick="setSub('Science', this)">Science</button>
         <button class="sub-pill" onclick="setSub('SST', this)">SST</button>
+        <button class="sub-pill" onclick="setSub('Hindi', this)">Hindi</button>
         <button class="sub-pill" onclick="setSub('English', this)">English</button>
     </nav>
 </div>
@@ -66,50 +82,61 @@
 
 <div id="settings-modal" class="modal">
     <div class="modal-ui">
-        <h3>Cloud Settings</h3>
+        <h3>Settings</h3>
         <input type="password" id="set-token" placeholder="GitHub Token">
         <input type="text" id="set-user" placeholder="Username">
         <input type="text" id="set-repo" placeholder="Repo Name">
-        <button onclick="saveSettings()" style="width:100%; padding:12px; background:var(--accent); color:white; border:0; border-radius:8px;">Save Settings</button>
+        <button onclick="saveSettings()" style="width:100%; padding:12px; background:var(--accent); color:white; border:0; border-radius:8px;">Save</button>
         <button onclick="closeModal('settings-modal')" style="width:100%; background:none; border:0; color:var(--text-dim); margin-top:10px;">Close</button>
     </div>
 </div>
 
 <div id="up-modal" class="modal">
     <div class="modal-ui">
-        <h3>Upload Notes</h3>
-        <select id="f-sub"><option>Maths</option><option>Science</option><option>SST</option><option>English</option></select>
-        <input type="text" id="f-chap" placeholder="Chapter Name (e.g. real number)">
+        <h3>Add Notes</h3>
+        <select id="f-sub"><option>Maths</option><option>Science</option><option>SST</option><option>Hindi</option><option>English</option></select>
+        <input type="text" id="f-chap" placeholder="Chapter Name">
         <input type="file" id="f-files" multiple accept="image/*">
-        <button onclick="pushNotes()" id="up-btn" style="width:100%; padding:12px; background:var(--accent); color:white; border:0; border-radius:8px;">Push to Cloud</button>
-        <button onclick="closeModal('up-modal')" style="width:100%; border:0; background:none; color:var(--text-dim); margin-top:10px;">Cancel</button>
+        <button onclick="pushNotes()" id="up-btn" style="width:100%; padding:12px; background:var(--accent); color:white; border:0; border-radius:8px;">Upload</button>
+        <button onclick="closeModal('up-modal')" style="width:100%; background:none; border:0; color:var(--text-dim); margin-top:10px;">Cancel</button>
     </div>
 </div>
 
-<div id="pre-modal" class="modal">
-    <div style="width:90%; max-width:800px; display:flex; justify-content:space-between; margin-bottom:10px;">
-        <h3 id="pre-title">Notes</h3>
+<div id="pre-modal" class="modal" style="display:none; padding:20px;">
+    <div style="width:100%; max-width:900px; display:flex; justify-content:space-between; margin-bottom:15px;">
+        <h3 id="pre-title" style="margin:0;">Preview</h3>
         <button onclick="closeModal('pre-modal')" style="background:none; border:0; color:white; font-size:30px;">&times;</button>
     </div>
-    <div id="gallery" style="overflow-y:auto; max-height:80vh; width:90%; max-width:800px;"></div>
+    <div id="gallery" style="overflow-y:auto; flex:1; width:100%; max-width:900px; display:flex; flex-direction:column; gap:20px;"></div>
+</div>
+
+<div id="hub-overlay">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h3>Activity Hub</h3>
+        <button onclick="toggleHub(false)" style="background:none; border:0; color:white; font-size:25px;">&times;</button>
+    </div>
+    <div style="margin-bottom:15px;">
+        <input type="text" id="chat-input" placeholder="Type message..." style="width:100%; padding:10px; background:#000; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
+        <button onclick="sendChat()" style="width:100%; padding:8px; background:var(--accent); border:0; border-radius:8px; color:white; margin-top:8px;">Broadcast</button>
+    </div>
+    <div id="hub-list" style="overflow-y:auto; flex:1;"></div>
 </div>
 
 <button class="fab add-fab" onclick="openModal('up-modal')">+</button>
+<button class="fab hub-fab" onclick="toggleHub(true)">🔔</button>
 
-<button class="fab logout-fab" onclick="logout()" title="Logout">
-    <svg viewBox="0 0 24 24" style="width:24px; height:24px; fill:white;">
-        <path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/>
-    </svg>
+<button class="fab logout-fab" onclick="logout()">
+    <svg viewBox="0 0 24 24" style="width:24px; height:24px; fill:white;"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg>
 </button>
 
 <script>
     const keys = { "U2lkIzl4WjI=": "Siddharth", "VGVqKjRrTDc=": "Tejeshwar", "QWp5JjFtUDU=": "Ajay" };
-    let db = []; let activeSub = "All";
+    let db = []; let chats = []; let activeSub = "All";
 
     function login() {
         const p = document.getElementById('pass').value.trim();
         if(keys[btoa(p)]) { localStorage.setItem("v_user", keys[btoa(p)]); location.reload(); }
-        else alert("Wrong Key!");
+        else alert("Wrong Access Key!");
     }
     function logout() { localStorage.removeItem("v_user"); location.reload(); }
 
@@ -138,9 +165,6 @@
         if(u) { 
             document.getElementById('gate').style.display = 'none'; 
             document.getElementById('u-name').innerText = u;
-            document.getElementById('set-token').value = localStorage.getItem("gh_token") || "";
-            document.getElementById('set-user').value = localStorage.getItem("gh_user") || "";
-            document.getElementById('set-repo').value = localStorage.getItem("gh_repo") || "";
             sync();
         }
     };
@@ -153,92 +177,120 @@
             for (let f of files) { 
                 if (f.name.endsWith('.json') && f.name !== '.gitkeep') {
                     const dRes = await fetch(f.download_url + "?t=" + Date.now());
-                    const data = await dRes.json();
-                    if(data.notes && data.notes.length > 0) db.push(data);
+                    db.push(await dRes.json());
                 }
             }
             render();
         }
+        const hRes = await gh("hub_chat.json");
+        if (hRes.ok) {
+            chats = JSON.parse(atob((await hRes.json()).content));
+            renderHub();
+        }
     }
 
     async function pushNotes() {
-        const sub = document.getElementById('f-sub').value, chap = document.getElementById('f-chap').value.trim(), fileInput = document.getElementById('f-files');
-        if(!chap || fileInput.files.length === 0) return alert("Details bhariye!");
+        const sub = document.getElementById('f-sub').value, chap = document.getElementById('f-chap').value.trim().toLowerCase(), fileInput = document.getElementById('f-files');
+        if(!chap || fileInput.files.length === 0) return alert("Pura fill karein!");
         
-        const btn = document.getElementById('up-btn'); btn.innerText = "Processing Photos..."; btn.disabled = true;
+        const btn = document.getElementById('up-btn'); btn.innerText = "Processing..."; btn.disabled = true;
 
-        try {
-            const imgs = await Promise.all(Array.from(fileInput.files).map(f => new Promise(r => {
-                const rd = new FileReader(); 
-                rd.onload = e => r(e.target.result); 
-                rd.readAsDataURL(f);
-            })));
+        const imgs = await Promise.all(Array.from(fileInput.files).map(f => new Promise(r => {
+            const rd = new FileReader(); rd.onload = e => r(e.target.result); rd.readAsDataURL(f);
+        })));
 
-            const fileName = `data/${sub}_${chap.replace(/\s+/g, '_')}.json`;
-            let sha = null, data = { subject: sub, chapter: chap, notes: [] };
+        const fileName = `data/${sub}_${chap.replace(/\s+/g, '_')}.json`;
+        let sha = null, data = { subject: sub, chapter: chap, notes: [] };
 
-            const check = await gh(fileName);
-            if (check.ok) {
-                const existing = await check.json();
-                sha = existing.sha;
-                data = JSON.parse(atob(existing.content));
-            }
+        const check = await gh(fileName);
+        if (check.ok) {
+            const existing = await check.json();
+            sha = existing.sha;
+            data = JSON.parse(atob(existing.content));
+        }
 
-            data.notes.push({ author: localStorage.getItem("v_user"), time: new Date().toLocaleString(), pages: imgs });
-            
-            btn.innerText = "Uploading to Cloud...";
-            const push = await gh(fileName, "PUT", { 
-                message: `Upload ${chap}`, 
-                content: btoa(unescape(encodeURIComponent(JSON.stringify(data)))), 
-                sha: sha 
-            });
+        data.notes.push({ id: Date.now(), author: localStorage.getItem("v_user"), pages: imgs });
+        const push = await gh(fileName, "PUT", { message: `Update ${chap}`, content: btoa(unescape(encodeURIComponent(JSON.stringify(data)))), sha: sha });
 
-            if(push.ok) { alert("Uploaded! ✅"); closeModal('up-modal'); sync(); } 
-            else { alert("Upload Failed ❌ Check Token permissions."); }
-        } catch(e) { alert("Error: " + e); }
-        btn.innerText = "Push to Cloud"; btn.disabled = false;
+        if(push.ok) { alert("Upload Successful! ✅"); closeModal('up-modal'); sync(); } 
+        else alert("Upload Failed ❌");
+        btn.innerText = "Upload"; btn.disabled = false;
     }
 
     function render() {
-        const grid = document.getElementById('main-grid');
+        const grid = document.getElementById('main-grid'), q = document.getElementById('search-bar').value.toLowerCase();
         grid.innerHTML = "";
-        const filtered = db.filter(i => (activeSub === "All" || i.subject === activeSub));
+        const filtered = db.filter(i => (activeSub === "All" || i.subject === activeSub) && i.chapter.includes(q));
         
-        if(filtered.length === 0) {
-            grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:50px; color:var(--text-dim);">Abhi koi notes nahi hain. Pehle upload karein.</div>`;
-            return;
-        }
-
         filtered.forEach(item => {
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
-                <div style="font-size:10px; color:var(--accent); font-weight:bold;">${item.subject.toUpperCase()}</div>
-                <h3 style="margin:10px 0;">${item.chapter}</h3>
-                <button onclick="viewVault('${item.chapter}')" style="width:100%; padding:10px; background:var(--accent); color:white; border:0; border-radius:8px; cursor:pointer;">Open Vault</button>
+                <div class="card-header"><span>${item.chapter.toUpperCase()}</span> <small style="color:var(--accent); font-size:10px;">${item.subject}</small></div>
+                <div class="card-body">
+                    ${item.notes.map(n => `
+                        <div class="note-row">
+                            <span>By <b>${n.author}</b></span>
+                            <div>
+                                <button class="btn-action btn-view" onclick="viewPages('${item.chapter}', ${n.id})">View (${n.pages.length})</button>
+                                ${n.author === localStorage.getItem("v_user") ? `<button class="btn-action btn-del" onclick="deleteNote('${item.chapter}', ${n.id})">Del</button>` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
             `;
             grid.appendChild(card);
         });
     }
 
-    function viewVault(name) {
-        const item = db.find(d => d.chapter === name);
+    function viewPages(chapName, noteId) {
+        const chap = db.find(d => d.chapter === chapName);
+        const note = chap.notes.find(n => n.id === noteId);
         const gal = document.getElementById('gallery');
-        document.getElementById('pre-title').innerText = name;
-        gal.innerHTML = item.notes.map(n => `
-            <div style="background:#000; padding:15px; border-radius:15px; border:1px solid #222; margin-bottom:20px;">
-                <p style="color:var(--accent); font-size:12px;">By ${n.author} | ${n.time}</p>
-                ${n.pages.map(p => `<img src="${p}" style="width:100%; border-radius:10px; margin-top:10px;">`).join('')}
+        document.getElementById('pre-title').innerText = `${chapName.toUpperCase()} - By ${note.author}`;
+        gal.innerHTML = note.pages.map((p, index) => `
+            <div style="background:#000; padding:15px; border-radius:15px; text-align:center; border:1px solid #222;">
+                <img src="${p}" style="width:100%; border-radius:10px; margin-bottom:15px;">
+                <a href="${p}" download="Note_${index+1}.png" style="display:block; padding:10px; background:var(--accent); color:white; text-decoration:none; border-radius:8px; font-weight:bold;">Download Photo ${index+1}</a>
             </div>
         `).join('');
         openModal('pre-modal');
     }
 
-    function setSub(s, b) { 
-        activeSub = s; 
-        document.querySelectorAll('.sub-pill').forEach(x => x.classList.remove('active'));
-        b.classList.add('active'); render(); 
+    async function deleteNote(chapName, noteId) {
+        if(!confirm("Delete this note?")) return;
+        const chap = db.find(d => d.chapter === chapName);
+        chap.notes = chap.notes.filter(n => n.id !== noteId);
+        
+        const fileName = `data/${chap.subject}_${chapName.replace(/\s+/g, '_')}.json`;
+        const check = await gh(fileName);
+        const sha = (await check.json()).sha;
+        
+        await gh(fileName, "PUT", { message: "Delete Note", content: btoa(unescape(encodeURIComponent(JSON.stringify(chap)))), sha: sha });
+        sync();
     }
+
+    async function sendChat() {
+        const input = document.getElementById('chat-input'), user = localStorage.getItem("v_user");
+        if(!input.value.trim()) return;
+        chats.unshift({ user, text: input.value, time: new Date().toLocaleTimeString() });
+        const check = await gh("hub_chat.json");
+        let sha = check.ok ? (await check.json()).sha : null;
+        await gh("hub_chat.json", "PUT", { message: "Chat", content: btoa(JSON.stringify(chats.slice(0,20))), sha });
+        input.value = ""; sync();
+    }
+
+    function renderHub() {
+        document.getElementById('hub-list').innerHTML = chats.map(c => `
+            <div style="background:#000; padding:10px; border-radius:10px; margin-bottom:10px; border-left:3px solid var(--accent);">
+                <small style="color:var(--accent); font-weight:bold;">${c.user}</small>
+                <div style="font-size:13px; margin:4px 0;">${c.text}</div>
+            </div>
+        `).join('');
+    }
+
+    function setSub(s, b) { activeSub = s; document.querySelectorAll('.sub-pill').forEach(x => x.classList.remove('active')); b.classList.add('active'); render(); }
+    function toggleHub(s) { document.getElementById('hub-overlay').classList.toggle('open', s); }
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 </script>
