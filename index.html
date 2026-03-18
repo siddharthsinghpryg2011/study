@@ -3,216 +3,265 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Class 10 | Private Study Vault</title>
+    <title>Vault.10 | Private Study Cloud</title>
     <style>
         :root {
-            --bg: #0a0a0a; --card: #141414; --accent: #3b82f6;
-            --text: #ffffff; --text-dim: #94a3b8; --border: #262626;
-            --success: #10b981; --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --bg: #050505; --card: #111111; --accent: #3b82f6;
+            --text: #ffffff; --text-dim: #94a3b8; --border: #222;
+            --danger: #ef4444; --success: #10b981;
+            --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
 
-        /* Login Overlay */
-        #gate { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; }
-        .lock-box { padding: 15px; width: 280px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); color: white; text-align: center; margin-bottom: 20px; outline: none; font-size: 16px; }
+        /* Auth Pages */
+        #gate, #exit-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; text-align: center; }
+        .lock-box { padding: 15px; width: 280px; border: 1px solid var(--border); border-radius: 12px; background: #000; color: white; margin-bottom: 20px; outline: none; }
 
         /* Header */
-        header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(10px); sticky: top; }
-        .brand { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.5px; }
+        header { padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(5,5,5,0.8); backdrop-filter: blur(15px); position: sticky; top: 0; z-index: 1000; }
+        .brand { font-size: 1.4rem; font-weight: 900; letter-spacing: -1px; }
         .brand span { color: var(--accent); }
-        .logout-link { font-size: 12px; color: var(--text-dim); cursor: pointer; text-decoration: underline; margin-top: 5px; display: block; }
 
-        /* Notification Section */
-        #notif-panel { max-width: 800px; margin: 20px auto; padding: 15px; background: #111; border: 1px solid var(--border); border-radius: 12px; }
-        .notif-item { font-size: 13px; padding: 10px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
-        .notif-item:last-child { border: 0; }
-        .notif-time { color: var(--text-dim); font-size: 11px; }
-
-        /* Subjects */
-        nav { display: flex; gap: 15px; padding: 20px; overflow-x: auto; justify-content: center; }
-        .sub-pill { padding: 10px 25px; border-radius: 30px; border: 1px solid var(--border); background: var(--card); color: var(--text-dim); cursor: pointer; transition: var(--transition); font-weight: 600; }
-        .sub-pill.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
-
-        /* Content Area */
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
-        .chapter-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-        .chap-card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 15px; cursor: pointer; transition: var(--transition); position: relative; }
-        .chap-card:hover { border-color: var(--accent); transform: translateY(-5px); }
+        /* Nav & Search */
+        .controls { max-width: 900px; margin: 20px auto; padding: 0 20px; }
+        nav { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
+        .sub-pill { padding: 10px 22px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text-dim); cursor: pointer; transition: var(--transition); white-space: nowrap; }
+        .sub-pill.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 0 20px rgba(59,130,246,0.3); }
         
-        /* Contributor List (Hidden by default) */
-        .contributors { margin-top: 15px; display: none; border-top: 1px solid #333; padding-top: 10px; }
-        .friend-btn { display: block; padding: 8px; color: var(--accent); text-decoration: none; font-size: 14px; transition: 0.2s; }
-        .friend-btn:hover { background: rgba(59, 130, 246, 0.1); border-radius: 5px; }
+        #search-bar { width: 100%; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; color: white; font-size: 16px; outline: none; margin-bottom: 20px; }
 
-        /* Floating Add Button */
-        .add-fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--accent); border-radius: 50%; border: 0; color: white; font-size: 24px; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        /* Notification Panel */
+        #notif-overlay { position: fixed; right: -400px; top: 0; width: 350px; height: 100%; background: var(--card); border-left: 1px solid var(--border); z-index: 5000; transition: var(--transition); padding: 25px; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
+        #notif-overlay.open { right: 0; }
+        .notif-msg { background: #000; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid var(--accent); font-size: 13px; position: relative; }
 
-        /* Modal */
-        #modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9000; align-items: center; justify-content: center; }
-        .m-content { background: var(--card); padding: 30px; border-radius: 20px; width: 350px; border: 1px solid var(--border); }
-        .m-content input, .m-content select { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid var(--border); color: white; border-radius: 8px; }
+        /* Chapter Cards */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; padding: 20px; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px; transition: var(--transition); }
+        .card:hover { border-color: var(--accent); transform: translateY(-5px); }
+        .friend-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-top: 1px solid #222; margin-top: 10px; }
+        
+        /* Preview Modal */
+        #preview-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 11000; flex-direction: column; align-items: center; justify-content: center; }
+        .img-container { display: flex; gap: 10px; overflow-x: auto; width: 90%; padding: 20px; }
+        .preview-img { height: 70vh; border-radius: 10px; border: 2px solid var(--accent); }
+
+        /* Buttons */
+        .btn-action { padding: 6px 12px; border-radius: 6px; border: 0; font-size: 12px; cursor: pointer; font-weight: bold; }
+        .btn-del { background: var(--danger); color: white; }
+        .btn-view { background: var(--accent); color: white; }
+        .add-fab { position: fixed; bottom: 30px; left: 30px; width: 60px; height: 60px; background: var(--accent); border-radius: 50%; border: 0; color: white; font-size: 28px; cursor: pointer; z-index: 2000; }
+        .notif-fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: #222; border-radius: 50%; border: 1px solid var(--border); color: white; font-size: 24px; cursor: pointer; z-index: 2000; }
     </style>
 </head>
 <body>
 
 <div id="gate">
-    <div class="brand" style="margin-bottom:20px; font-size:2rem;">VAULT<span>.10</span></div>
+    <div class="brand" style="font-size: 3rem; margin-bottom: 10px;">VAULT<span>.10</span></div>
+    <p style="color:var(--text-dim); margin-bottom: 30px;">Professional Academic Repository</p>
     <input type="password" id="pass" class="lock-box" placeholder="Access Key">
-    <button onclick="login()" style="width:280px; padding:12px; background:var(--accent); color:white; border:0; border-radius:12px; font-weight:bold; cursor:pointer;">Authenticate</button>
+    <button onclick="login()" style="width:280px; padding:15px; background:var(--accent); color:white; border:0; border-radius:12px; font-weight:bold; cursor:pointer;">Authenticate</button>
+</div>
+
+<div id="exit-screen" style="display:none;">
+    <div class="brand" style="font-size: 2.5rem;">Thank You.</div>
+    <p style="color:var(--text-dim); margin-top: 15px;">Your session has been securely closed.</p>
+    <button onclick="location.reload()" style="margin-top:30px; background:none; border:1px solid var(--border); color:white; padding:10px 25px; border-radius:8px; cursor:pointer;">Login Again</button>
 </div>
 
 <header>
-    <div>
-        <div class="brand">CLASS<span>.10</span> STUDY HUB</div>
-        <div id="u-display" style="font-size:12px; color:var(--text-dim); margin-top:5px;">User: Siddharth</div>
-        <span class="logout-link" onclick="logout()">Reset Session</span>
-    </div>
-    <div style="text-align: right;">
-        <span style="color:var(--success); font-size:12px; font-weight:bold;">● SYSTEM ONLINE</span>
+    <div class="brand">VAULT<span>.10</span></div>
+    <div id="user-info" style="text-align:right;">
+        <span id="u-name" style="font-weight:bold; display:block;">Siddharth</span>
+        <span onclick="logout()" style="color:var(--danger); font-size:11px; cursor:pointer;">Secure Logout</span>
     </div>
 </header>
 
-<div class="container">
-    <div id="notif-panel">
-        <strong style="font-size:12px; color:var(--accent); text-transform:uppercase;">Recent Activity</strong>
-        <div id="notif-list" style="margin-top:10px;">
-            </div>
-    </div>
-
-    <nav>
-        <button class="sub-pill" onclick="filterSub('Maths', this)">Maths</button>
-        <button class="sub-pill" onclick="filterSub('Science', this)">Science</button>
-        <button class="sub-pill" onclick="filterSub('SST', this)">SST</button>
-        <button class="sub-pill" onclick="filterSub('English', this)">English</button>
+<div class="controls">
+    <input type="text" id="search-bar" placeholder="Search by chapter name..." oninput="renderContent()">
+    <nav id="nav-filters">
+        <button class="sub-pill active" onclick="setSub('All', this)">All Subjects</button>
+        <button class="sub-pill" onclick="setSub('Maths', this)">Maths</button>
+        <button class="sub-pill" onclick="setSub('Science', this)">Science</button>
+        <button class="sub-pill" onclick="setSub('SST', this)">SST</button>
+        <button class="sub-pill" onclick="setSub('Hindi', this)">Hindi</button>
+        <button class="sub-pill" onclick="setSub('English', this)">English</button>
     </nav>
-
-    <div id="display-area" class="chapter-list">
-        </div>
 </div>
 
-<button class="add-fab" onclick="toggleModal(true)">+</button>
+<div id="main-grid" class="grid"></div>
 
-<div id="modal">
-    <div class="m-content">
-        <h3>New Upload</h3>
-        <select id="up-sub">
-            <option>Maths</option><option>Science</option><option>SST</option><option>English</option>
-        </select>
-        <input type="text" id="up-chap" placeholder="Chapter Name">
-        <input type="file" id="up-file">
-        <button onclick="processUpload()" style="width:100%; padding:12px; background:var(--accent); color:white; border:0; border-radius:8px; margin-top:10px; font-weight:bold; cursor:pointer;">Push to Cloud</button>
-        <button onclick="toggleModal(false)" style="width:100%; background:none; border:0; color:var(--text-dim); margin-top:10px; cursor:pointer;">Cancel</button>
+<div id="notif-overlay">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h3>Activity Log</h3>
+        <button onclick="toggleNotif(false)" style="background:none; border:0; color:white; font-size:20px; cursor:pointer;">×</button>
     </div>
+    <div style="margin-bottom:20px;">
+        <input type="text" id="msg-input" placeholder="Broadcast a message..." class="lock-box" style="width:100%; font-size:12px; margin-bottom:10px;">
+        <button onclick="sendMsg()" style="width:100%; padding:8px; background:var(--accent); border:0; border-radius:5px; color:white; font-size:12px;">Send Message</button>
+    </div>
+    <div id="notif-list"></div>
 </div>
+
+<div id="preview-modal">
+    <div style="width:100%; padding:20px; display:flex; justify-content:space-between;">
+        <button onclick="downloadAll()" style="color:var(--accent); background:none; border:1px solid var(--accent); padding:10px; border-radius:5px; cursor:pointer;">Download All</button>
+        <button onclick="closePreview()" style="color:white; background:none; border:0; font-size:30px; cursor:pointer;">×</button>
+    </div>
+    <div id="img-gallery" class="img-container"></div>
+    <p style="color:var(--text-dim); margin-top:20px;">Scroll horizontally for multiple images</p>
+</div>
+
+<button class="add-fab" onclick="toggleUpload(true)">+</button>
+<button class="notif-fab" onclick="toggleNotif(true)">🔔</button>
 
 <script>
     const keys = { "U2lkIzl4WjI=": "Siddharth", "VGVqKjRrTDc=": "Tejeshwar", "QWp5JjFtUDU=": "Ajay" };
+    let activeSub = "All";
     
-    // Asli Data: Only these will show up
-    let db = [
-        { subject: "Science", chapter: "Motion", authors: ["Siddharth", "Tejeshwar"] },
-        { subject: "Maths", chapter: "Polynomials", authors: ["Ajay"] },
-        { subject: "SST", chapter: "French Revolution", authors: ["Siddharth"] }
-    ];
-
-    let notifications = JSON.parse(localStorage.getItem("v_notifs")) || [
-        { msg: "System initialized for Class 10th", time: new Date().toLocaleString() }
-    ];
+    // Database Logic: starts empty
+    let db = JSON.parse(localStorage.getItem("v_db")) || [];
+    let notifs = JSON.parse(localStorage.getItem("v_notifs")) || [];
 
     window.onload = () => {
         const s = localStorage.getItem("v_user");
         if (s) unlock(s);
-        renderNotifs();
+        renderContent();
     };
 
     function login() {
         const p = document.getElementById('pass').value;
         const enc = btoa(p);
-        if (keys[enc]) {
+        if(keys[enc]) {
             localStorage.setItem("v_user", keys[enc]);
             unlock(keys[enc]);
-        } else { alert("ACCESS DENIED"); }
+        } else { alert("Invalid Credentials"); }
     }
 
     function unlock(n) {
         document.getElementById('gate').style.display = 'none';
-        document.getElementById('u-display').innerText = "Logged in as: " + n;
+        document.getElementById('u-name').innerText = n;
     }
 
-    function logout() { localStorage.clear(); location.reload(); }
+    function logout() {
+        document.getElementById('exit-screen').style.display = 'flex';
+        localStorage.removeItem("v_user");
+    }
 
-    function filterSub(sub, btn) {
+    function setSub(s, btn) {
+        activeSub = s;
         document.querySelectorAll('.sub-pill').forEach(x => x.classList.remove('active'));
         btn.classList.add('active');
+        renderContent();
+    }
+
+    function renderContent() {
+        const grid = document.getElementById('main-grid');
+        const query = document.getElementById('search-bar').value.toLowerCase();
+        grid.innerHTML = "";
         
-        const area = document.getElementById('display-area');
-        area.innerHTML = "";
-        
-        const filtered = db.filter(x => x.subject === sub);
-        
+        let filtered = db.filter(item => {
+            const matchesSub = activeSub === "All" || item.subject === activeSub;
+            const matchesSearch = item.chapter.toLowerCase().includes(query);
+            return matchesSub && matchesSearch;
+        });
+
         if(filtered.length === 0) {
-            area.innerHTML = `<p style="color:var(--text-dim)">No chapters uploaded yet for ${sub}.</p>`;
+            grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:50px; color:var(--text-dim);">No notes found in this section.</div>`;
             return;
         }
 
-        filtered.forEach((item, index) => {
+        filtered.forEach((item, idx) => {
+            const currentUser = localStorage.getItem("v_user");
+            const isOwner = item.author === currentUser;
+            
             const card = document.createElement('div');
-            card.className = 'chap-card';
+            card.className = 'card';
             card.innerHTML = `
-                <div style="font-weight:bold">${item.chapter}</div>
-                <div style="font-size:11px; color:var(--accent); margin-top:5px;">${item.authors.length} Notes Available</div>
-                <div class="contributors" id="cont-box-${index}">
-                    ${item.authors.map(a => `<a class="friend-btn" onclick="alert('Viewing ${a} notes')">📄 ${a}'s Notes</a>`).join('')}
+                <div style="font-size:12px; color:var(--accent); font-weight:bold; margin-bottom:5px;">${item.subject.toUpperCase()}</div>
+                <div style="font-size:1.2rem; font-weight:bold;">${item.chapter}</div>
+                <div class="friend-row">
+                    <span style="font-size:13px; color:var(--text-dim)">By ${item.author}</span>
+                    <div style="display:flex; gap:5px;">
+                        ${isOwner ? `<button class="btn-action btn-del" onclick="deleteNote(${idx})">Delete</button>` : ''}
+                        <button class="btn-action btn-view" onclick="previewNote(${idx})">Preview (${item.imgs.length})</button>
+                    </div>
                 </div>
             `;
-            card.onclick = () => {
-                const cBox = document.getElementById(`cont-box-${index}`);
-                cBox.style.display = cBox.style.display === 'block' ? 'none' : 'block';
-            };
-            area.appendChild(card);
+            grid.appendChild(card);
         });
     }
 
-    function toggleModal(s) { document.getElementById('modal').style.display = s ? 'flex' : 'none'; }
+    function toggleNotif(s) { document.getElementById('notif-overlay').classList.toggle('open', s); renderNotifs(); }
 
-    function processUpload() {
-        const sub = document.getElementById('up-sub').value;
-        const chap = document.getElementById('up-chap').value;
-        const user = localStorage.getItem("v_user");
-
-        if(!chap) return alert("Enter chapter name");
-
-        // Add to database
-        let existing = db.find(x => x.chapter.toLowerCase() === chap.toLowerCase() && x.subject === sub);
-        if(existing) {
-            if(!existing.authors.includes(user)) existing.authors.push(user);
-        } else {
-            db.push({ subject: sub, chapter: chap, authors: [user] });
-        }
-
-        // Add Notification
-        const newNotif = {
-            msg: `<b>${user}</b> uploaded <b>${chap}</b> (${sub})`,
-            time: new Date().toLocaleString()
-        };
-        notifications.unshift(newNotif);
-        localStorage.setItem("v_notifs", JSON.stringify(notifications));
-
+    function sendMsg() {
+        const inp = document.getElementById('msg-input');
+        if(!inp.value) return;
+        const msg = { type: 'msg', user: localStorage.getItem("v_user"), text: inp.value, time: new Date().toLocaleTimeString() };
+        notifs.unshift(msg);
+        localStorage.setItem("v_notifs", JSON.stringify(notifs));
+        inp.value = "";
         renderNotifs();
-        toggleModal(false);
-        alert("Pushed Successfully!");
     }
 
     function renderNotifs() {
         const list = document.getElementById('notif-list');
-        list.innerHTML = notifications.slice(0, 5).map(n => `
-            <div class="notif-item">
-                <span>${n.msg}</span>
-                <span class="notif-time">${n.time}</span>
+        list.innerHTML = notifs.map(n => `
+            <div class="notif-msg">
+                <strong>${n.user}:</strong> ${n.text || `Uploaded ${n.chapter}`} 
+                <div style="font-size:9px; color:var(--text-dim); margin-top:5px;">${n.time}</div>
             </div>
         `).join('');
     }
+
+    // Logic for Multiple Uploads
+    function toggleUpload() {
+        const sub = prompt("Subject? (Maths/Science/SST/Hindi/English)");
+        const chap = prompt("Chapter Name?");
+        if(!sub || !chap) return;
+        
+        // Simulating multiple file selection
+        const count = prompt("How many images to upload?", "1");
+        const images = [];
+        for(let i=0; i<count; i++) images.push("https://via.placeholder.com/600x800?text=Page+"+(i+1)); 
+
+        const entry = {
+            subject: sub,
+            chapter: chap,
+            author: localStorage.getItem("v_user"),
+            imgs: images,
+            time: new Date().toLocaleString()
+        };
+
+        db.unshift(entry);
+        localStorage.setItem("v_db", JSON.stringify(db));
+        
+        notifs.unshift({ user: entry.author, chapter: chap, time: entry.time });
+        localStorage.setItem("v_notifs", JSON.stringify(notifs));
+        
+        renderContent();
+        alert("Notes Uploaded Successfully!");
+    }
+
+    function deleteNote(idx) {
+        if(confirm("Delete this note permanently?")) {
+            db.splice(idx, 1);
+            localStorage.setItem("v_db", JSON.stringify(db));
+            renderContent();
+        }
+    }
+
+    function previewNote(idx) {
+        const item = db[idx];
+        const modal = document.getElementById('preview-modal');
+        const gallery = document.getElementById('img-gallery');
+        gallery.innerHTML = item.imgs.map(src => `<img src="${src}" class="preview-img">`).join('');
+        modal.style.display = 'flex';
+    }
+
+    function closePreview() { document.getElementById('preview-modal').style.display = 'none'; }
+    function downloadAll() { alert("Starting secure download of all pages..."); }
 </script>
 </body>
 </html>
