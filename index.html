@@ -3,255 +3,350 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vault.10 | Private Study Cloud</title>
+    <title>Vault.10 | Glassmorphism Edition</title>
     <style>
         :root {
-            --bg: #050505; --card: #111; --accent: #3b82f6;
-            --text: #fff; --text-dim: #94a3b8; --border: #222;
-            --danger: #ef4444; --success: #10b981;
-            --transition: all 0.3s ease;
+            --bg: #050505; 
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent: #3b82f6;
+            --text: #fff; 
+            --text-dim: #94a3b8;
+            --danger: #ef4444;
+            --success: #10b981;
         }
 
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: radial-gradient(circle at top right, #1a1a1a, #050505); 
+            color: var(--text); 
+            margin: 0; 
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-        /* Auth & Logout Screens */
-        #gate, #exit-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; text-align: center; }
-        .lock-box { padding: 15px; width: 280px; border: 1px solid var(--border); border-radius: 12px; background: #000; color: white; margin-bottom: 20px; outline: none; }
+        /* Auth Screens */
+        #gate, #exit-screen { 
+            position: fixed; inset: 0; background: var(--bg); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            z-index: 10000; padding: 20px; text-align: center;
+        }
 
-        /* Header */
-        header { padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(5,5,5,0.8); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; }
-        .brand { font-size: 1.4rem; font-weight: 900; }
+        .brand { font-size: 2.5rem; font-weight: 900; letter-spacing: -1.5px; margin-bottom: 1rem; }
         .brand span { color: var(--accent); }
 
-        /* Controls */
-        .controls { max-width: 900px; margin: 20px auto; padding: 0 20px; }
-        nav { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
-        .sub-pill { padding: 10px 22px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text-dim); cursor: pointer; white-space: nowrap; }
+        .lock-box { 
+            padding: 15px; width: 100%; max-width: 300px; 
+            border: 1px solid var(--glass-border); border-radius: 12px; 
+            background: rgba(255,255,255,0.05); color: white; outline: none; transition: 0.3s;
+            text-align: center; font-size: 16px;
+        }
+
+        .btn-blue { background: var(--accent); color: white; border: 0; border-radius: 12px; cursor: pointer; font-weight: 700; transition: 0.2s; }
+        .btn-blue:active { transform: scale(0.96); }
+        .auth-btn { width: 100%; max-width: 300px; padding: 15px; font-size: 1rem; margin-top: 10px; }
+
+        /* Header */
+        header { 
+            padding: 15px 25px; border-bottom: 1px solid var(--glass-border); 
+            display: flex; justify-content: space-between; align-items: center; 
+            background: rgba(5,5,5,0.7); backdrop-filter: blur(20px); 
+            position: sticky; top: 0; z-index: 1000; 
+        }
+        .user-meta { text-align: right; }
+        #u-name { display: block; font-weight: bold; color: var(--accent); font-size: 14px; }
+        .logout-link { color: var(--danger); font-size: 10px; cursor: pointer; text-transform: uppercase; }
+
+        /* Controls & Search */
+        .controls { max-width: 900px; margin: 20px auto; padding: 0 15px; }
+        #search-bar { 
+            width: 100%; padding: 18px 25px; 
+            background: var(--glass); backdrop-filter: blur(10px); 
+            border: 1px solid var(--glass-border); border-radius: 20px; 
+            color: white; outline: none; margin-bottom: 25px; box-sizing: border-box;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); transition: 0.3s;
+        }
+        #search-bar:focus { border-color: var(--accent); background: rgba(255,255,255,0.06); }
+
+        nav { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+        nav::-webkit-scrollbar { display: none; }
+        .sub-pill { 
+            padding: 8px 22px; border-radius: 30px; border: 1px solid var(--glass-border); 
+            background: var(--glass); color: var(--text-dim); cursor: pointer; white-space: nowrap; transition: 0.3s;
+        }
         .sub-pill.active { background: var(--accent); color: white; border-color: var(--accent); }
-        
-        #search-bar { width: 100%; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; color: white; outline: none; margin-bottom: 20px; box-sizing: border-box; }
 
-        /* Grid */
+        /* Grid & Cards */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 20px; max-width: 1200px; margin: auto; }
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px; transition: var(--transition); }
-        .card:hover { border-color: var(--accent); }
+        .card { 
+            background: var(--glass); border: 1px solid var(--glass-border); 
+            border-radius: 24px; padding: 25px; backdrop-filter: blur(5px);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .card:hover { transform: translateY(-8px); border-color: var(--accent); background: rgba(255,255,255,0.05); }
 
-        /* Modal */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9000; align-items: center; justify-content: center; flex-direction: column; }
-        .modal-ui { background: var(--card); padding: 30px; border-radius: 20px; width: 320px; border: 1px solid var(--border); }
-        .modal-ui input, .modal-ui select { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; }
+        /* FABs */
+        .fab { 
+            position: fixed; width: 60px; height: 60px; border-radius: 50%; 
+            border: 0; color: white; font-size: 24px; cursor: pointer; z-index: 2000; 
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .add-fab { bottom: 30px; left: 30px; background: var(--accent); }
+        .notif-fab { bottom: 30px; right: 30px; background: #1a1a1a; border: 1px solid var(--glass-border); }
 
-        /* Gallery */
-        .gallery-wrap { display: flex; gap: 20px; overflow-x: auto; width: 95%; padding: 20px; scroll-snap-type: x mandatory; }
-        .preview-img-box { flex: 0 0 auto; scroll-snap-align: center; text-align: center; width: 280px; }
-        .preview-img { width: 100%; border-radius: 10px; border: 1px solid var(--border); }
+        /* Modals */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9000; align-items: center; justify-content: center; padding: 20px; }
+        .glass-modal { background: #111; border: 1px solid var(--glass-border); border-radius: 25px; padding: 30px; width: 100%; max-width: 350px; }
+        .modal-header-wrap { width: 90%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .close-btn { background: none; border: 0; color: white; font-size: 30px; cursor: pointer; }
 
-        .btn { padding: 10px 15px; border-radius: 8px; border: 0; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.2s; }
-        .btn-blue { background: var(--accent); color: white; }
-        .btn-red { background: var(--danger); color: white; }
-        .fab { position: fixed; bottom: 30px; left: 30px; width: 60px; height: 60px; border-radius: 50%; border: 0; color: white; font-size: 24px; cursor: pointer; z-index: 2000; background: var(--accent); }
+        .gallery-wrap { display: flex; gap: 20px; overflow-x: auto; width: 100%; padding: 20px; scroll-snap-type: x mandatory; }
+        .preview-img-box { flex: 0 0 280px; scroll-snap-align: center; background: #000; border: 1px solid var(--glass-border); padding: 15px; border-radius: 20px; text-align: center; }
+        .preview-img { width: 100%; border-radius: 12px; margin-bottom: 10px; }
+
+        /* Activity Hub Overlay */
+        #notif-overlay { 
+            position: fixed; right: -100%; top: 0; width: 100%; max-width: 350px; 
+            height: 100%; background: #0f0f0f; border-left: 1px solid var(--glass-border); 
+            z-index: 5000; transition: 0.4s ease; padding: 25px; box-sizing: border-box; display: flex; flex-direction: column;
+        }
+        #notif-overlay.open { right: 0; }
+        .notif-msg { background: var(--glass); padding: 12px; border-radius: 12px; margin-bottom: 12px; border-left: 3px solid var(--accent); }
+
+        .btn-cancel { background: none; border: 0; color: var(--text-dim); margin-top: 10px; width: 100%; cursor: pointer; font-size: 13px; }
     </style>
 </head>
 <body>
 
-<div id="gate">
-    <div class="brand" style="font-size: 3rem; margin-bottom: 20px;">VAULT<span>.10</span></div>
-    <input type="password" id="pass" class="lock-box" placeholder="Enter Access Key">
-    <button onclick="login()" class="btn-blue" style="width:280px; padding:15px;">Authenticate</button>
-</div>
-
-<div id="exit-screen" style="display:none;">
-    <div class="brand" style="font-size: 3rem; margin-bottom: 10px;">Logged Out</div>
-    <p style="color:var(--text-dim); margin-bottom: 30px;">Session closed successfully.</p>
-    <button onclick="backToLogin()" class="btn-blue" style="width:200px; padding:15px;">Login Again</button>
-</div>
-
-<header id="main-header" style="display:none;">
-    <div class="brand">VAULT<span>.10</span></div>
-    <div style="text-align: right;">
-        <span id="u-name" style="font-weight:bold; display:block;">User</span>
-        <span onclick="logout()" style="color:var(--danger); font-size:11px; cursor:pointer;">Secure Logout</span>
+    <div id="gate">
+        <div class="brand" style="font-size: 3.5rem;">VAULT<span>.10</span></div>
+        <input type="password" id="pass" class="lock-box" placeholder="Access Key">
+        <button onclick="login()" class="btn-blue auth-btn">Authenticate</button>
     </div>
-</header>
 
-<main id="app-content" style="display:none;">
-    <div class="controls">
-        <input type="text" id="search-bar" placeholder="Search chapters..." oninput="render()">
-        <nav>
-            <button class="sub-pill active" onclick="setSub('All', this)">All</button>
-            <button class="sub-pill" onclick="setSub('Maths', this)">Maths</button>
-            <button class="sub-pill" onclick="setSub('Science', this)">Science</button>
-            <button class="sub-pill" onclick="setSub('SST', this)">SST</button>
-            <button class="sub-pill" onclick="setSub('Hindi', this)">Hindi</button>
-            <button class="sub-pill" onclick="setSub('English', this)">English</button>
-        </nav>
+    <div id="exit-screen" style="display:none;">
+        <div class="brand" style="font-size: 3rem;">Logged Out</div>
+        <p style="color:var(--text-dim); margin-bottom: 30px;">Session closed safely.</p>
+        <button onclick="backToLogin()" class="btn-blue" style="width:220px; padding:15px;">Login Again</button>
     </div>
-    <div id="main-grid" class="grid"></div>
-</main>
 
-<div id="up-modal" class="modal">
-    <div class="modal-ui">
-        <h3 style="margin-top:0;">Add to Vault</h3>
-        <select id="f-sub">
-            <option>Maths</option><option>Science</option><option>SST</option><option>Hindi</option><option>English</option>
-        </select>
-        <input type="text" id="f-chap" placeholder="Chapter Name (Same name to merge)">
-        <input type="file" id="f-files" multiple accept="image/*">
-        <button onclick="pushNotes()" id="up-btn" class="btn-blue" style="width:100%; margin-top:10px;">Push to Cloud</button>
-        <button onclick="closeModal('up-modal')" style="width:100%; background:none; border:0; color:var(--text-dim); margin-top:10px; cursor:pointer;">Cancel</button>
+    <header id="main-header" style="display:none;">
+        <div class="brand">VAULT<span>.10</span></div>
+        <div class="user-meta">
+            <span id="u-name">User</span>
+            <span onclick="logout()" class="logout-link">Secure Logout</span>
+        </div>
+    </header>
+
+    <main id="app-content" style="display:none;">
+        <div class="controls">
+            <input type="text" id="search-bar" placeholder="Search chapters..." oninput="render()">
+            <nav id="subject-nav"></nav>
+        </div>
+        <div id="main-grid" class="grid"></div>
+    </main>
+
+    <div id="up-modal" class="modal">
+        <div class="modal-ui glass-modal">
+            <h3 style="margin-top:0; color:var(--accent);">Push to Vault</h3>
+            <select id="f-sub" class="lock-box" style="margin-bottom:10px; max-width:100%;">
+                <option>Maths</option><option>Science</option><option>SST</option><option>Hindi</option><option>English</option>
+            </select>
+            <input type="text" id="f-chap" class="lock-box" style="margin-bottom:10px; max-width:100%; text-align:left;" placeholder="Chapter Name">
+            <input type="file" id="f-files" multiple accept="image/*" style="margin-bottom:15px;">
+            <button onclick="pushNotes()" id="up-btn" class="btn-blue" style="width:100%; padding:12px;">Push to Cloud</button>
+            <button onclick="closeModal('up-modal')" class="btn-cancel">Cancel</button>
+        </div>
     </div>
-</div>
 
-<div id="pre-modal" class="modal">
-    <div style="width:90%; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <h3 id="pre-title" style="margin:0;">Preview</h3>
-        <button onclick="closeModal('pre-modal')" style="background:none; border:0; color:white; font-size:30px; cursor:pointer;">&times;</button>
+    <div id="pre-modal" class="modal">
+        <div class="modal-header-wrap">
+            <h3 id="pre-title" style="margin:0;">Preview</h3>
+            <button onclick="closeModal('pre-modal')" class="close-btn">&times;</button>
+        </div>
+        <div id="gallery" class="gallery-wrap"></div>
     </div>
-    <div id="gallery" class="gallery-wrap"></div>
-</div>
 
-<button id="add-btn" class="fab" style="display:none;" onclick="openModal('up-modal')">+</button>
+    <div id="notif-overlay">
+        <div class="notif-header">
+            <h3 style="margin:0;">Activity Hub</h3>
+            <button onclick="toggleNotif(false)" class="close-btn">&times;</button>
+        </div>
+        <div style="margin-top:20px;">
+            <input type="text" id="chat-input" class="lock-box" style="width:100%; text-align:left; font-size:14px; max-width:100%;" placeholder="Broadcast message...">
+            <button onclick="sendChat()" class="btn-blue" style="width:100%; margin-top:10px; padding:10px;">Send</button>
+        </div>
+        <div id="notif-list" style="margin-top:20px; overflow-y:auto; flex:1;"></div>
+    </div>
 
-<script>
-    const keys = { "U2lkIzl4WjI=": "Siddharth", "VGVqKjRrTDc=": "Tejeshwar", "QWp5JjFtUDU=": "Ajay" };
-    let db = JSON.parse(localStorage.getItem("v_db")) || [];
-    let activeSub = "All";
+    <button id="add-btn" class="fab add-fab" style="display:none;" onclick="openModal('up-modal')">+</button>
+    <button id="notif-btn" class="fab notif-fab" style="display:none;" onclick="toggleNotif(true)">🔔</button>
 
-    // Suggestion logic: Border green if chapter exists
-    document.getElementById('f-chap').addEventListener('input', (e) => {
-        const val = e.target.value.trim().toLowerCase();
-        const sub = document.getElementById('f-sub').value;
-        const exists = db.some(i => i.chapter.toLowerCase() === val && i.subject === sub);
-        e.target.style.borderColor = exists ? "var(--success)" : "var(--border)";
-    });
+    <script>
+        const keys = { "U2lkIzl4WjI=": "Siddharth", "VGVqKjRrTDc=": "Tejeshwar", "QWp5JjFtUDU=": "Ajay" };
+        let db = JSON.parse(localStorage.getItem("v_db")) || [];
+        let chats = JSON.parse(localStorage.getItem("v_notifs")) || [];
+        let activeSub = "All";
 
-    function login() {
-        const p = document.getElementById('pass').value.trim();
-        const enc = btoa(p);
-        if(keys[enc]) { 
-            localStorage.setItem("v_user", keys[enc]); 
-            initApp(); 
-        } else { alert("Access Denied"); }
-    }
+        const subjects = ['All', 'Maths', 'Science', 'SST', 'Hindi', 'English'];
 
-    function logout() {
-        localStorage.removeItem("v_user");
-        document.getElementById('main-header').style.display = 'none';
-        document.getElementById('app-content').style.display = 'none';
-        document.getElementById('add-btn').style.display = 'none';
-        document.getElementById('exit-screen').style.display = 'flex';
-    }
+        function initNav() {
+            const nav = document.getElementById('subject-nav');
+            nav.innerHTML = subjects.map(s => 
+                `<button class="sub-pill ${s===activeSub?'active':''}" onclick="setSub('${s}', this)">${s}</button>`
+            ).join('');
+        }
 
-    function backToLogin() {
-        document.getElementById('exit-screen').style.display = 'none';
-        document.getElementById('gate').style.display = 'flex';
-        document.getElementById('pass').value = "";
-    }
-
-    function initApp() {
-        const u = localStorage.getItem("v_user");
-        if(u) {
-            document.getElementById('gate').style.display = 'none';
-            document.getElementById('main-header').style.display = 'flex';
-            document.getElementById('app-content').style.display = 'block';
-            document.getElementById('add-btn').style.display = 'flex';
-            document.getElementById('u-name').innerText = u;
+        function setSub(s, btn) {
+            activeSub = s;
+            document.querySelectorAll('.sub-pill').forEach(x => x.classList.remove('active'));
+            btn.classList.add('active');
             render();
         }
-    }
 
-    window.onload = initApp;
-
-    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    function setSub(s, btn) {
-        activeSub = s;
-        document.querySelectorAll('.sub-pill').forEach(x => x.classList.remove('active'));
-        btn.classList.add('active');
-        render();
-    }
-
-    async function pushNotes() {
-        const sub = document.getElementById('f-sub').value;
-        const chap = document.getElementById('f-chap').value.trim();
-        const files = document.getElementById('f-files').files;
-        const user = localStorage.getItem("v_user");
-
-        if(!chap || files.length === 0) return alert("Select images and enter title!");
-        document.getElementById('up-btn').innerText = "Uploading...";
-
-        const imgPromises = Array.from(files).map(f => new Promise(r => {
-            const rd = new FileReader();
-            rd.onload = (e) => r({ src: e.target.result, by: user });
-            rd.readAsDataURL(f);
-        }));
-
-        const newImgs = await Promise.all(imgPromises);
-        const idx = db.findIndex(i => i.chapter.toLowerCase() === chap.toLowerCase() && i.subject === sub);
-
-        if(idx !== -1) {
-            db[idx].imgs.push(...newImgs);
-            if(!db[idx].authors.includes(user)) db[idx].authors.push(user);
-        } else {
-            db.unshift({ id: Date.now(), subject: sub, chapter: chap, authors: [user], imgs: newImgs });
+        function login() {
+            const p = document.getElementById('pass').value.trim();
+            const enc = btoa(p);
+            if(keys[enc]) { 
+                localStorage.setItem("v_user", keys[enc]); 
+                initApp(); 
+            } else { alert("Wrong Access Key!"); }
         }
 
-        localStorage.setItem("v_db", JSON.stringify(db));
-        document.getElementById('up-btn').innerText = "Push to Cloud";
-        closeModal('up-modal');
-        render();
-    }
+        function logout() {
+            localStorage.removeItem("v_user");
+            ['main-header', 'app-content', 'add-btn', 'notif-btn'].forEach(id => document.getElementById(id).style.display = 'none');
+            document.getElementById('exit-screen').style.display = 'flex';
+        }
 
-    function render() {
-        const grid = document.getElementById('main-grid');
-        const q = document.getElementById('search-bar').value.toLowerCase();
-        grid.innerHTML = "";
-        const filtered = db.filter(i => (activeSub === "All" || i.subject === activeSub) && i.chapter.toLowerCase().includes(q));
+        function backToLogin() {
+            document.getElementById('exit-screen').style.display = 'none';
+            document.getElementById('gate').style.display = 'flex';
+            document.getElementById('pass').value = "";
+        }
 
-        filtered.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <div style="font-size:10px; color:var(--accent); font-weight:bold;">${item.subject.toUpperCase()}</div>
-                <div style="font-size:1.2rem; font-weight:bold; margin: 10px 0;">${item.chapter}</div>
-                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #222; padding-top:10px;">
-                    <span style="font-size:9px; color:var(--text-dim)">By: ${item.authors.join(', ')}</span>
-                    <button class="btn btn-blue" onclick="openGallery(${item.id})">View (${item.imgs.length})</button>
-                </div>
-            `;
-            grid.appendChild(card);
-        });
-    }
+        function initApp() {
+            const u = localStorage.getItem("v_user");
+            if(u) {
+                document.getElementById('gate').style.display = 'none';
+                document.getElementById('main-header').style.display = 'flex';
+                document.getElementById('app-content').style.display = 'block';
+                document.getElementById('add-btn').style.display = 'flex';
+                document.getElementById('notif-btn').style.display = 'flex';
+                document.getElementById('u-name').innerText = u;
+                initNav();
+                render();
+            }
+        }
 
-    function openGallery(id) {
-        const item = db.find(x => x.id === id);
-        const gal = document.getElementById('gallery');
-        const user = localStorage.getItem("v_user");
-        document.getElementById('pre-title').innerText = item.chapter;
-        
-        gal.innerHTML = item.imgs.map((img, i) => `
-            <div class="preview-img-box">
-                <img src="${img.src}" class="preview-img">
-                <div style="font-size:10px; margin:5px 0;">Uploaded by: ${img.by}</div>
-                <div style="display:flex; gap:5px;">
-                    <a href="${img.src}" download="${item.chapter}_P${i+1}.png" class="btn btn-blue" style="flex:1; text-align:center; text-decoration:none;">Download</a>
-                    ${img.by === user ? `<button onclick="delPage(${id}, ${i})" class="btn btn-red">Delete</button>` : ''}
-                </div>
-            </div>
-        `).join('');
-        openModal('pre-modal');
-    }
+        window.onload = initApp;
 
-    function delPage(noteId, imgIdx) {
-        if(confirm("Delete this page?")) {
-            const note = db.find(x => x.id === noteId);
-            note.imgs.splice(imgIdx, 1);
-            if(note.imgs.length === 0) db = db.filter(x => x.id !== noteId);
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function toggleNotif(show) { 
+            document.getElementById('notif-overlay').classList.toggle('open', show); 
+            if(show) renderChats(); 
+        }
+
+        async function pushNotes() {
+            const sub = document.getElementById('f-sub').value;
+            const chap = document.getElementById('f-chap').value.trim();
+            const fileInput = document.getElementById('f-files');
+            const user = localStorage.getItem("v_user");
+
+            if(!chap || fileInput.files.length === 0) return alert("Details missing!");
+
+            const imgPromises = Array.from(fileInput.files).map(f => new Promise(r => {
+                const rd = new FileReader();
+                rd.onload = (e) => r({ src: e.target.result, by: user });
+                rd.readAsDataURL(f);
+            }));
+
+            const newImgs = await Promise.all(imgPromises);
+            const idx = db.findIndex(i => i.chapter.toLowerCase() === chap.toLowerCase() && i.subject === sub);
+
+            if(idx !== -1) {
+                db[idx].imgs.push(...newImgs);
+                if(!db[idx].authors.includes(user)) db[idx].authors.push(user);
+            } else {
+                db.unshift({ id: Date.now(), subject: sub, chapter: chap, authors: [user], imgs: newImgs });
+            }
+
+            chats.unshift({ user: user, text: `Uploaded to <b>${chap}</b>`, time: new Date().toLocaleTimeString() });
             localStorage.setItem("v_db", JSON.stringify(db));
+            localStorage.setItem("v_notifs", JSON.stringify(chats));
+            closeModal('up-modal');
             render();
-            closeModal('pre-modal');
         }
-    }
-</script>
+
+        function render() {
+            const grid = document.getElementById('main-grid');
+            const q = document.getElementById('search-bar').value.toLowerCase();
+            grid.innerHTML = "";
+            const filtered = db.filter(i => (activeSub === "All" || i.subject === activeSub) && i.chapter.toLowerCase().includes(q));
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div style="font-size:10px; color:var(--accent); font-weight:900; letter-spacing:1px; margin-bottom:5px;">${item.subject.toUpperCase()}</div>
+                    <div style="font-size:1.3rem; font-weight:bold; margin-bottom:15px;">${item.chapter}</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid rgba(255,255,255,0.1); padding-top:12px;">
+                        <span style="font-size:9px; color:var(--text-dim)">By: ${item.authors.join(', ')}</span>
+                        <button class="btn-blue" style="padding:6px 14px; font-size:11px;" onclick="openGallery(${item.id})">VIEW (${item.imgs.length})</button>
+                    </div>`;
+                grid.appendChild(card);
+            });
+        }
+
+        function openGallery(id) {
+            const item = db.find(x => x.id === id);
+            const gal = document.getElementById('gallery');
+            const user = localStorage.getItem("v_user");
+            document.getElementById('pre-title').innerText = item.chapter;
+            
+            gal.innerHTML = item.imgs.map((img, i) => `
+                <div class="preview-img-box">
+                    <img src="${img.src}" class="preview-img">
+                    <div style="font-size:10px; margin-bottom:10px; color:var(--text-dim)">By ${img.by}</div>
+                    <div style="display:flex; gap:10px;">
+                        <a href="${img.src}" download="${item.chapter}_P${i+1}.png" class="btn-blue" style="flex:1; text-align:center; padding:8px; text-decoration:none; font-size:11px;">DOWNLOAD</a>
+                        ${img.by === user ? `<button onclick="delPage(${id}, ${i})" style="padding:8px 12px; border:0; border-radius:10px; background:var(--danger); color:white; cursor:pointer;">🗑️</button>` : ''}
+                    </div>
+                </div>`).join('');
+            openModal('pre-modal');
+        }
+
+        function delPage(noteId, imgIdx) {
+            if(confirm("Delete page?")) {
+                const note = db.find(x => x.id === noteId);
+                note.imgs.splice(imgIdx, 1);
+                if(note.imgs.length === 0) db = db.filter(x => x.id !== noteId);
+                localStorage.setItem("v_db", JSON.stringify(db));
+                render();
+                closeModal('pre-modal');
+            }
+        }
+
+        function sendChat() {
+            const input = document.getElementById('chat-input');
+            if(!input.value.trim()) return;
+            chats.unshift({ user: localStorage.getItem("v_user"), text: input.value, time: new Date().toLocaleTimeString() });
+            localStorage.setItem("v_notifs", JSON.stringify(chats));
+            input.value = "";
+            renderChats();
+        }
+
+        function renderChats() {
+            const list = document.getElementById('notif-list');
+            list.innerHTML = chats.map((c, i) => `
+                <div class="notif-msg">
+                    <strong style="font-size:11px; color:var(--accent);">${c.user}</strong>
+                    <div style="font-size:13px; margin:5px 0;">${c.text}</div>
+                    <div style="font-size:9px; opacity:0.5;">${c.time}</div>
+                </div>`).join('');
+        }
+    </script>
 </body>
 </html>
