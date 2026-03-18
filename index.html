@@ -1,193 +1,217 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Vault | Fixed & Animated</title>
+    <title>Class 10 | Private Study Vault</title>
     <style>
         :root {
-            --p: #2563eb; --s: #22c55e; --d: #ef4444;
-            --bg: #f8fafc; --card: #ffffff; --text: #1e293b;
-            --border: #e2e8f0; --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --bg: #0a0a0a; --card: #141414; --accent: #3b82f6;
+            --text: #ffffff; --text-dim: #94a3b8; --border: #262626;
+            --success: #10b981; --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        [data-theme="dark"] {
-            --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --border: #334155;
-        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
 
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; transition: var(--transition); }
-
-        /* Login Screen */
-        #gate { position: fixed; inset: 0; background: var(--card); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; }
-        .in-box { padding: 12px; width: 260px; border: 2px solid var(--border); border-radius: 12px; background: var(--card); color: var(--text); outline: none; text-align: center; margin-bottom: 20px; }
+        /* Login Overlay */
+        #gate { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; }
+        .lock-box { padding: 15px; width: 280px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); color: white; text-align: center; margin-bottom: 20px; outline: none; font-size: 16px; }
 
         /* Header */
-        header { background: var(--p); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .logout-btn { background: var(--d); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; margin-top: 5px; }
+        header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(10px); sticky: top; }
+        .brand { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.5px; }
+        .brand span { color: var(--accent); }
+        .logout-link { font-size: 12px; color: var(--text-dim); cursor: pointer; text-decoration: underline; margin-top: 5px; display: block; }
 
-        /* Nav & Content */
-        nav { display: flex; gap: 10px; padding: 15px; background: var(--card); overflow-x: auto; border-bottom: 1px solid var(--border); }
-        .sub-btn { padding: 8px 20px; background: var(--bg); border: 1px solid var(--border); border-radius: 20px; cursor: pointer; color: var(--text); white-space: nowrap; transition: 0.3s; }
-        .sub-btn.active { background: var(--p); color: white; transform: scale(1.1); box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); }
+        /* Notification Section */
+        #notif-panel { max-width: 800px; margin: 20px auto; padding: 15px; background: #111; border: 1px solid var(--border); border-radius: 12px; }
+        .notif-item { font-size: 13px; padding: 10px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
+        .notif-item:last-child { border: 0; }
+        .notif-time { color: var(--text-dim); font-size: 11px; }
 
-        .container { max-width: 600px; margin: 30px auto; padding: 0 20px; text-align: center; }
-        #search { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid var(--border); background: var(--card); color: var(--text); font-size: 16px; outline-color: var(--p); }
+        /* Subjects */
+        nav { display: flex; gap: 15px; padding: 20px; overflow-x: auto; justify-content: center; }
+        .sub-pill { padding: 10px 25px; border-radius: 30px; border: 1px solid var(--border); background: var(--card); color: var(--text-dim); cursor: pointer; transition: var(--transition); font-weight: 600; }
+        .sub-pill.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
 
-        /* Dropdown & Results */
-        .drop { background: var(--card); border-radius: 12px; margin-top: 15px; border: 1px solid var(--border); display: none; text-align: left; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        .chap-h { background: rgba(0,0,0,0.05); padding: 12px; font-weight: bold; border-bottom: 1px solid var(--border); }
-        .f-row { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid var(--border); display: block; text-decoration: none; color: var(--text); transition: 0.2s; }
-        .f-row:hover { background: var(--p); color: white; padding-left: 30px; }
+        /* Content Area */
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .chapter-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .chap-card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 15px; cursor: pointer; transition: var(--transition); position: relative; }
+        .chap-card:hover { border-color: var(--accent); transform: translateY(-5px); }
+        
+        /* Contributor List (Hidden by default) */
+        .contributors { margin-top: 15px; display: none; border-top: 1px solid #333; padding-top: 10px; }
+        .friend-btn { display: block; padding: 8px; color: var(--accent); text-decoration: none; font-size: 14px; transition: 0.2s; }
+        .friend-btn:hover { background: rgba(59, 130, 246, 0.1); border-radius: 5px; }
 
-        /* Add Notes Modal */
-        #note-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-        .modal-content { background: var(--card); padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; position: relative; }
-        .modal-content h3 { margin-top: 0; }
-        .modal-content input, .modal-content select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); box-sizing: border-box; }
+        /* Floating Add Button */
+        .add-fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--accent); border-radius: 50%; border: 0; color: white; font-size: 24px; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
 
-        /* Theme Toggle */
-        .t-btn { position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; border-radius: 50%; border: none; background: var(--p); color: white; cursor: pointer; font-size: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 5000; }
+        /* Modal */
+        #modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9000; align-items: center; justify-content: center; }
+        .m-content { background: var(--card); padding: 30px; border-radius: 20px; width: 350px; border: 1px solid var(--border); }
+        .m-content input, .m-content select { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid var(--border); color: white; border-radius: 8px; }
     </style>
 </head>
 <body>
 
 <div id="gate">
-    <h2>Vault Access</h2>
-    <input type="password" id="pass" class="in-box" placeholder="Password...">
-    <button onclick="login()" style="padding:12px 35px; background:var(--p); color:white; border:none; border-radius:10px; cursor:pointer; font-weight:bold;">Unlock</button>
+    <div class="brand" style="margin-bottom:20px; font-size:2rem;">VAULT<span>.10</span></div>
+    <input type="password" id="pass" class="lock-box" placeholder="Access Key">
+    <button onclick="login()" style="width:280px; padding:12px; background:var(--accent); color:white; border:0; border-radius:12px; font-weight:bold; cursor:pointer;">Authenticate</button>
 </div>
 
 <header>
     <div>
-        <div id="u-name" style="font-weight:bold; font-size: 1.1rem;">Welcome</div>
-        <button id="l-out" class="logout-btn" onclick="logout()" style="display:none;">Reset Session</button>
+        <div class="brand">CLASS<span>.10</span> STUDY HUB</div>
+        <div id="u-display" style="font-size:12px; color:var(--text-dim); margin-top:5px;">User: Siddharth</div>
+        <span class="logout-link" onclick="logout()">Reset Session</span>
     </div>
-    <button onclick="toggleModal(true)" style="background:var(--s); color:white; border:none; padding:10px 18px; border-radius:10px; cursor:pointer; font-weight:bold;">+ Add Notes</button>
+    <div style="text-align: right;">
+        <span style="color:var(--success); font-size:12px; font-weight:bold;">● SYSTEM ONLINE</span>
+    </div>
 </header>
 
-<nav>
-    <button class="sub-btn" onclick="setSub('Maths', this)">Maths</button>
-    <button class="sub-btn" onclick="setSub('Science', this)">Science</button>
-    <button class="sub-btn" onclick="setSub('SST', this)">SST</button>
-    <button class="sub-btn" onclick="setSub('Hindi', this)">Hindi</button>
-    <button class="sub-btn" onclick="setSub('English', this)">English</button>
-</nav>
-
 <div class="container">
-    <h3 id="cur-sub" style="opacity: 0.6;">Select a Subject</h3>
-    <input type="text" id="search" placeholder="Type chapter name..." oninput="doSearch()">
-    
-    <div id="drop" class="drop"></div>
-    <div id="no-chap" style="display:none; color:var(--d); margin-top:25px; font-weight:bold;">❌ No such chapter found!</div>
+    <div id="notif-panel">
+        <strong style="font-size:12px; color:var(--accent); text-transform:uppercase;">Recent Activity</strong>
+        <div id="notif-list" style="margin-top:10px;">
+            </div>
+    </div>
+
+    <nav>
+        <button class="sub-pill" onclick="filterSub('Maths', this)">Maths</button>
+        <button class="sub-pill" onclick="filterSub('Science', this)">Science</button>
+        <button class="sub-pill" onclick="filterSub('SST', this)">SST</button>
+        <button class="sub-pill" onclick="filterSub('English', this)">English</button>
+    </nav>
+
+    <div id="display-area" class="chapter-list">
+        </div>
 </div>
 
-<div id="note-modal">
-    <div class="modal-content">
-        <h3>Upload Chapter Note</h3>
-        <label>Subject:</label>
+<button class="add-fab" onclick="toggleModal(true)">+</button>
+
+<div id="modal">
+    <div class="m-content">
+        <h3>New Upload</h3>
         <select id="up-sub">
-            <option>Maths</option><option>Science</option><option>SST</option><option>Hindi</option><option>English</option>
+            <option>Maths</option><option>Science</option><option>SST</option><option>English</option>
         </select>
-        <label>Chapter Name:</label>
-        <input type="text" id="up-chap" placeholder="e.g. Polynomials">
-        <label>Select Photo:</label>
-        <input type="file" id="up-file" accept="image/*">
-        <button onclick="saveToGitHub()" style="width:100%; background:var(--p); color:white; border:none; padding:12px; border-radius:8px; margin-top:10px; cursor:pointer; font-weight:bold;">Upload to GitHub</button>
-        <button onclick="toggleModal(false)" style="width:100%; background:none; border:none; color:var(--text); margin-top:10px; cursor:pointer; opacity:0.6;">Close</button>
+        <input type="text" id="up-chap" placeholder="Chapter Name">
+        <input type="file" id="up-file">
+        <button onclick="processUpload()" style="width:100%; padding:12px; background:var(--accent); color:white; border:0; border-radius:8px; margin-top:10px; font-weight:bold; cursor:pointer;">Push to Cloud</button>
+        <button onclick="toggleModal(false)" style="width:100%; background:none; border:0; color:var(--text-dim); margin-top:10px; cursor:pointer;">Cancel</button>
     </div>
 </div>
 
-<button class="t-btn" onclick="toggleT()">🌓</button>
-
 <script>
-    // Base64 Passwords: Sid#9xZ2, Tej*4kL7, Ajy&1mP5
     const keys = { "U2lkIzl4WjI=": "Siddharth", "VGVqKjRrTDc=": "Tejeshwar", "QWp5JjFtUDU=": "Ajay" };
-    let activeS = "";
+    
+    // Asli Data: Only these will show up
+    let db = [
+        { subject: "Science", chapter: "Motion", authors: ["Siddharth", "Tejeshwar"] },
+        { subject: "Maths", chapter: "Polynomials", authors: ["Ajay"] },
+        { subject: "SST", chapter: "French Revolution", authors: ["Siddharth"] }
+    ];
 
-    const data = {
-        "Maths": ["Polynomials", "Number Systems", "Quadrilaterals"],
-        "Science": ["Motion", "Force", "Sound", "Gravitation", "Matter in Our Surroundings"],
-        "SST": ["French Revolution", "Poverty as a Challenge"],
-        "Hindi": ["Do Bailon Ki Katha"],
-        "English": ["The Fun They Had", "The Road Not Taken"]
-    };
+    let notifications = JSON.parse(localStorage.getItem("v_notifs")) || [
+        { msg: "System initialized for Class 10th", time: new Date().toLocaleString() }
+    ];
 
     window.onload = () => {
         const s = localStorage.getItem("v_user");
         if (s) unlock(s);
-        if (localStorage.getItem("v_theme") === "dark") toggleT(true);
+        renderNotifs();
     };
 
     function login() {
         const p = document.getElementById('pass').value;
-        const encoded = btoa(p);
-        if (keys[encoded]) {
-            localStorage.setItem("v_user", keys[encoded]);
-            unlock(keys[encoded]);
-        } else { alert("Invalid Password!"); }
+        const enc = btoa(p);
+        if (keys[enc]) {
+            localStorage.setItem("v_user", keys[enc]);
+            unlock(keys[enc]);
+        } else { alert("ACCESS DENIED"); }
     }
 
     function unlock(n) {
         document.getElementById('gate').style.display = 'none';
-        document.getElementById('u-name').innerHTML = "User: " + n;
-        document.getElementById('l-out').style.display = 'block';
+        document.getElementById('u-display').innerText = "Logged in as: " + n;
     }
 
-    function logout() { localStorage.removeItem("v_user"); location.reload(); }
+    function logout() { localStorage.clear(); location.reload(); }
 
-    function toggleT(forceDark = false) {
-        let theme = document.documentElement.getAttribute("data-theme");
-        if (theme === "dark" && !forceDark) {
-            document.documentElement.setAttribute("data-theme", "light");
-            localStorage.setItem("v_theme", "light");
-        } else {
-            document.documentElement.setAttribute("data-theme", "dark");
-            localStorage.setAttribute("v_theme", "dark");
-        }
-    }
-
-    function toggleModal(show) { document.getElementById('note-modal').style.display = show ? 'flex' : 'none'; }
-
-    function setSub(s, b) {
-        activeS = s;
-        document.querySelectorAll('.sub-btn').forEach(x => x.classList.remove('active'));
-        b.classList.add('active');
-        document.getElementById('cur-sub').innerText = "Subject: " + s;
-        document.getElementById('search').value = "";
-        doSearch();
-    }
-
-    function doSearch() {
-        const q = document.getElementById('search').value.toLowerCase();
-        const d = document.getElementById('drop');
-        const err = document.getElementById('no-chap');
-        d.innerHTML = "";
+    function filterSub(sub, btn) {
+        document.querySelectorAll('.sub-pill').forEach(x => x.classList.remove('active'));
+        btn.classList.add('active');
         
-        if (!activeS || !q) { d.style.display = "none"; err.style.display = "none"; return; }
-
-        const filtered = (data[activeS] || []).filter(x => x.toLowerCase().includes(q));
+        const area = document.getElementById('display-area');
+        area.innerHTML = "";
         
-        if (filtered.length > 0) {
-            d.style.display = "block";
-            err.style.display = "none";
-            filtered.forEach(c => {
-                d.innerHTML += `<div class="chap-h">${c}</div>
-                    <div class="f-row" onclick="alert('Opening Siddharth')">📄 Siddharth's Notes</div>
-                    <div class="f-row" onclick="alert('Opening Tejeshwar')">📄 Tejeshwar's Notes</div>
-                    <div class="f-row" onclick="alert('Opening Ajay')">📄 Ajay's Notes</div>`;
-            });
-        } else {
-            d.style.display = "none";
-            err.style.display = "block"; // This shows the 'No such chapter found' message
+        const filtered = db.filter(x => x.subject === sub);
+        
+        if(filtered.length === 0) {
+            area.innerHTML = `<p style="color:var(--text-dim)">No chapters uploaded yet for ${sub}.</p>`;
+            return;
         }
+
+        filtered.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'chap-card';
+            card.innerHTML = `
+                <div style="font-weight:bold">${item.chapter}</div>
+                <div style="font-size:11px; color:var(--accent); margin-top:5px;">${item.authors.length} Notes Available</div>
+                <div class="contributors" id="cont-box-${index}">
+                    ${item.authors.map(a => `<a class="friend-btn" onclick="alert('Viewing ${a} notes')">📄 ${a}'s Notes</a>`).join('')}
+                </div>
+            `;
+            card.onclick = () => {
+                const cBox = document.getElementById(`cont-box-${index}`);
+                cBox.style.display = cBox.style.display === 'block' ? 'none' : 'block';
+            };
+            area.appendChild(card);
+        });
     }
 
-    function saveToGitHub() {
+    function toggleModal(s) { document.getElementById('modal').style.display = s ? 'flex' : 'none'; }
+
+    function processUpload() {
+        const sub = document.getElementById('up-sub').value;
         const chap = document.getElementById('up-chap').value;
-        const file = document.getElementById('up-file').files[0];
-        if(!chap || !file) { alert("Please fill all details!"); return; }
-        alert(`Uploading ${file.name} for ${chap}... Connect your GitHub Token to finish!`);
+        const user = localStorage.getItem("v_user");
+
+        if(!chap) return alert("Enter chapter name");
+
+        // Add to database
+        let existing = db.find(x => x.chapter.toLowerCase() === chap.toLowerCase() && x.subject === sub);
+        if(existing) {
+            if(!existing.authors.includes(user)) existing.authors.push(user);
+        } else {
+            db.push({ subject: sub, chapter: chap, authors: [user] });
+        }
+
+        // Add Notification
+        const newNotif = {
+            msg: `<b>${user}</b> uploaded <b>${chap}</b> (${sub})`,
+            time: new Date().toLocaleString()
+        };
+        notifications.unshift(newNotif);
+        localStorage.setItem("v_notifs", JSON.stringify(notifications));
+
+        renderNotifs();
         toggleModal(false);
+        alert("Pushed Successfully!");
+    }
+
+    function renderNotifs() {
+        const list = document.getElementById('notif-list');
+        list.innerHTML = notifications.slice(0, 5).map(n => `
+            <div class="notif-item">
+                <span>${n.msg}</span>
+                <span class="notif-time">${n.time}</span>
+            </div>
+        `).join('');
     }
 </script>
 </body>
