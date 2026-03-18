@@ -3,219 +3,255 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vault.10 | Class 10 Boards</title>
+    <title>Vault.10 | Private Study Cloud</title>
     <style>
         :root {
-            --bg: #050505; 
-            --glass: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.12);
-            --accent: #10b981; /* Boards ke liye Success Green accent */
-            --text: #fff; 
-            --text-dim: #94a3b8;
-            --danger: #ef4444;
+            --bg: #050505; --card: #111; --accent: #3b82f6;
+            --text: #fff; --text-dim: #94a3b8; --border: #222;
+            --danger: #ef4444; --success: #10b981;
+            --transition: all 0.3s ease;
         }
 
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; min-height: 100vh; overflow-x: hidden; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
 
-        /* Unified Centered Inputs */
-        .glass-input { width: 100%; max-width: 320px; padding: 15px; border: 1px solid var(--glass-border); border-radius: 14px; background: rgba(255,255,255,0.03); color: white; outline: none; text-align: center; box-sizing: border-box; display: block; margin: 10px auto; font-size: 14px; }
-        select.glass-input { background: #000 !important; cursor: pointer; color: #fff; }
+        /* Auth & Logout Screens */
+        #gate, #exit-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; text-align: center; }
+        .lock-box { padding: 15px; width: 280px; border: 1px solid var(--border); border-radius: 12px; background: #000; color: white; margin-bottom: 20px; outline: none; }
 
-        .btn-blue { background: var(--accent); color: white; border: 0; border-radius: 12px; cursor: pointer; font-weight: 700; padding: 15px; width: 100%; max-width: 320px; display: block; margin: 15px auto; transition: 0.2s; }
-        .btn-blue:active { transform: scale(0.96); }
+        /* Header */
+        header { padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(5,5,5,0.8); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; }
+        .brand { font-size: 1.4rem; font-weight: 900; }
+        .brand span { color: var(--accent); }
 
-        header { padding: 15px 25px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; background: rgba(5,5,5,0.8); backdrop-filter: blur(25px); position: sticky; top: 0; z-index: 1000; }
+        /* Controls */
+        .controls { max-width: 900px; margin: 20px auto; padding: 0 20px; }
+        nav { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
+        .sub-pill { padding: 10px 22px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text-dim); cursor: pointer; white-space: nowrap; }
+        .sub-pill.active { background: var(--accent); color: white; border-color: var(--accent); }
+        
+        #search-bar { width: 100%; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; color: white; outline: none; margin-bottom: 20px; box-sizing: border-box; }
 
-        /* Frost Glass Modals */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; }
-        .frost-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: 32px; padding: 40px 20px; width: 100%; max-width: 400px; text-align: center; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.6); }
+        /* Grid */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 20px; max-width: 1200px; margin: auto; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px; transition: var(--transition); }
+        .card:hover { border-color: var(--accent); }
 
-        /* Notification Panel */
-        #notif-overlay { position: fixed; right: -100%; top: 0; width: 100%; max-width: 380px; height: 100%; background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(40px); border-left: 1px solid var(--glass-border); z-index: 10001; transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1); display: flex; flex-direction: column; align-items: center; padding: 30px 20px; box-sizing: border-box; }
-        #notif-overlay.open { right: 0; }
+        /* Modal */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9000; align-items: center; justify-content: center; flex-direction: column; }
+        .modal-ui { background: var(--card); padding: 30px; border-radius: 20px; width: 320px; border: 1px solid var(--border); }
+        .modal-ui input, .modal-ui select { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; }
 
-        .sub-pill { padding: 8px 20px; border-radius: 30px; border: 1px solid var(--glass-border); background: var(--glass); color: white; cursor: pointer; white-space: nowrap; transition: 0.3s; margin: 5px; font-size: 13px; }
-        .sub-pill.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
+        /* Gallery */
+        .gallery-wrap { display: flex; gap: 20px; overflow-x: auto; width: 95%; padding: 20px; scroll-snap-type: x mandatory; }
+        .preview-img-box { flex: 0 0 auto; scroll-snap-align: center; text-align: center; width: 280px; }
+        .preview-img { width: 100%; border-radius: 10px; border: 1px solid var(--border); }
 
-        .fab { position: fixed; width: 65px; height: 65px; border-radius: 50%; border: 0; color: white; font-size: 24px; cursor: pointer; z-index: 5000; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .add-fab { bottom: 30px; left: 30px; background: var(--accent); }
-        .notif-fab { bottom: 30px; right: 30px; background: #1a1a1a; border: 1px solid var(--glass-border); }
-
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 25px; max-width: 1200px; margin: auto; }
-        .card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 24px; padding: 25px; transition: 0.4s; position: relative; }
-        .close-btn { background: none; border: 0; color: white; font-size: 32px; cursor: pointer; position: absolute; right: 20px; top: 15px; }
+        .btn { padding: 10px 15px; border-radius: 8px; border: 0; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.2s; }
+        .btn-blue { background: var(--accent); color: white; }
+        .btn-red { background: var(--danger); color: white; }
+        .fab { position: fixed; bottom: 30px; left: 30px; width: 60px; height: 60px; border-radius: 50%; border: 0; color: white; font-size: 24px; cursor: pointer; z-index: 2000; background: var(--accent); }
     </style>
 </head>
-<body onclick="closeAll(event)">
+<body>
 
-    <div id="gate" style="position:fixed; inset:0; background:#050505; z-index:20000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-        <h1 style="font-size: 3rem; margin-bottom: 20px;">VAULT<span>.10</span></h1>
-        <input type="password" id="pass" class="glass-input" placeholder="Board Access Key">
-        <button onclick="login()" class="btn-blue">Unlock Vault</button>
+<div id="gate">
+    <div class="brand" style="font-size: 3rem; margin-bottom: 20px;">VAULT<span>.10</span></div>
+    <input type="password" id="pass" class="lock-box" placeholder="Enter Access Key">
+    <button onclick="login()" class="btn-blue" style="width:280px; padding:15px;">Authenticate</button>
+</div>
+
+<div id="exit-screen" style="display:none;">
+    <div class="brand" style="font-size: 3rem; margin-bottom: 10px;">Logged Out</div>
+    <p style="color:var(--text-dim); margin-bottom: 30px;">Session closed successfully.</p>
+    <button onclick="backToLogin()" class="btn-blue" style="width:200px; padding:15px;">Login Again</button>
+</div>
+
+<header id="main-header" style="display:none;">
+    <div class="brand">VAULT<span>.10</span></div>
+    <div style="text-align: right;">
+        <span id="u-name" style="font-weight:bold; display:block;">User</span>
+        <span onclick="logout()" style="color:var(--danger); font-size:11px; cursor:pointer;">Secure Logout</span>
     </div>
+</header>
 
-    <header id="main-header" style="display:none;">
-        <div style="font-weight:900; font-size:1.5rem;">VAULT<span>.10</span></div>
-        <div style="text-align:right;">
-            <span id="u-name" style="display:block; font-weight:bold; color:var(--accent);">User</span>
-            <span onclick="logout()" style="color:var(--danger); font-size:10px; cursor:pointer; font-weight:bold;">EXIT</span>
-        </div>
-    </header>
-
-    <main id="app-content" style="display:none;">
-        <div style="max-width:900px; margin:20px auto; padding:0 15px; text-align:center;">
-            <input type="text" id="search-bar" class="glass-input" style="max-width:100%; border-radius:25px;" placeholder="Search Class 10 Chapters..." oninput="render()">
-            <div id="subject-nav" style="display:flex; flex-wrap:wrap; justify-content: center; margin-top:10px;">
-                <button class="sub-pill active" onclick="setSub('All', this)">All</button>
-                <button class="sub-pill" onclick="setSub('Physics', this)">Physics</button>
-                <button class="sub-pill" onclick="setSub('Chemistry', this)">Chemistry</button>
-                <button class="sub-pill" onclick="setSub('Biology', this)">Biology</button>
-                <button class="sub-pill" onclick="setSub('Maths', this)">Maths</button>
-                <button class="sub-pill" onclick="setSub('SST', this)">SST</button>
-                <button class="sub-pill" onclick="setSub('English', this)">English</button>
-            </div>
-        </div>
-        <div id="main-grid" class="grid"></div>
-    </main>
-
-    <div id="up-modal" class="modal" onclick="closeModal('up-modal')">
-        <div class="frost-card" onclick="event.stopPropagation()">
-            <button class="close-btn" onclick="closeModal('up-modal')">&times;</button>
-            <h2 style="margin-bottom:20px;">Add Board Notes</h2>
-            <select id="f-sub" class="glass-input">
-                <option>Physics</option><option>Chemistry</option><option>Biology</option>
-                <option>Maths</option><option>SST</option><option>English</option>
-            </select>
-            <input type="text" id="f-chap" class="glass-input" placeholder="Chapter Name (e.g. Light)">
-            <input type="file" id="f-files" multiple accept="image/*" style="margin:15px 0; color:white; font-size:12px;">
-            <button onclick="pushNotes()" class="btn-blue">Confirm Upload</button>
-        </div>
+<main id="app-content" style="display:none;">
+    <div class="controls">
+        <input type="text" id="search-bar" placeholder="Search chapters..." oninput="render()">
+        <nav>
+            <button class="sub-pill active" onclick="setSub('All', this)">All</button>
+            <button class="sub-pill" onclick="setSub('Maths', this)">Maths</button>
+            <button class="sub-pill" onclick="setSub('Science', this)">Science</button>
+            <button class="sub-pill" onclick="setSub('SST', this)">SST</button>
+            <button class="sub-pill" onclick="setSub('Hindi', this)">Hindi</button>
+            <button class="sub-pill" onclick="setSub('English', this)">English</button>
+        </nav>
     </div>
+    <div id="main-grid" class="grid"></div>
+</main>
 
-    <div id="notif-overlay" onclick="event.stopPropagation()">
-        <button class="close-btn" onclick="toggleNotif(false)">&times;</button>
-        <h3 style="margin-bottom:25px;">Activity Hub</h3>
-        <input type="text" id="chat-input" class="glass-input" style="background:#000; width:100%;" placeholder="Type message...">
-        <button onclick="sendChat()" class="btn-blue" style="width:100%; padding:12px;">Broadcast</button>
-        <div id="notif-list" style="width:100%; overflow-y:auto; flex:1; margin-top:20px; scrollbar-width:none;"></div>
+<div id="up-modal" class="modal">
+    <div class="modal-ui">
+        <h3 style="margin-top:0;">Add to Vault</h3>
+        <select id="f-sub">
+            <option>Maths</option><option>Science</option><option>SST</option><option>Hindi</option><option>English</option>
+        </select>
+        <input type="text" id="f-chap" placeholder="Chapter Name (Same name to merge)">
+        <input type="file" id="f-files" multiple accept="image/*">
+        <button onclick="pushNotes()" id="up-btn" class="btn-blue" style="width:100%; margin-top:10px;">Push to Cloud</button>
+        <button onclick="closeModal('up-modal')" style="width:100%; background:none; border:0; color:var(--text-dim); margin-top:10px; cursor:pointer;">Cancel</button>
     </div>
+</div>
 
-    <button id="add-btn" class="fab add-fab" style="display:none;" onclick="openModal('up-modal'); event.stopPropagation();">+</button>
-    <button id="notif-btn" class="fab notif-fab" style="display:none;" onclick="toggleNotif(true); event.stopPropagation();">🔔</button>
+<div id="pre-modal" class="modal">
+    <div style="width:90%; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h3 id="pre-title" style="margin:0;">Preview</h3>
+        <button onclick="closeModal('pre-modal')" style="background:none; border:0; color:white; font-size:30px; cursor:pointer;">&times;</button>
+    </div>
+    <div id="gallery" class="gallery-wrap"></div>
+</div>
 
-    <script>
-        const keys = { 
-            "U2lkIzl4WjI=": "Siddharth", 
-            "VGVqKjRrTDc=": "Tejeshwar", 
-            "QWp5JjFtUDU=": "Ajay",
-            "SXNoQDh2TjM=": "Ishmeet" 
-        };
-        let db = JSON.parse(localStorage.getItem("v_db")) || [];
-        let chats = JSON.parse(localStorage.getItem("v_notifs")) || [];
-        let activeSub = "All";
+<button id="add-btn" class="fab" style="display:none;" onclick="openModal('up-modal')">+</button>
 
-        function login() {
-            const p = document.getElementById('pass').value.trim();
-            const enc = btoa(p);
-            if(keys[enc]) { localStorage.setItem("v_user", keys[enc]); initApp(); } 
-            else { alert("Unauthorized Access!"); }
-        }
+<script>
+    const keys = { "U2lkIzl4WjI=": "Siddharth", "VGVqKjRrTDc=": "Tejeshwar", "QWp5JjFtUDU=": "Ajay" };
+    let db = JSON.parse(localStorage.getItem("v_db")) || [];
+    let activeSub = "All";
 
-        function logout() { localStorage.removeItem("v_user"); location.reload(); }
+    // Suggestion logic: Border green if chapter exists
+    document.getElementById('f-chap').addEventListener('input', (e) => {
+        const val = e.target.value.trim().toLowerCase();
+        const sub = document.getElementById('f-sub').value;
+        const exists = db.some(i => i.chapter.toLowerCase() === val && i.subject === sub);
+        e.target.style.borderColor = exists ? "var(--success)" : "var(--border)";
+    });
 
-        function initApp() {
-            const u = localStorage.getItem("v_user");
-            if(u) {
-                document.getElementById('gate').style.display = 'none';
-                ['main-header', 'app-content', 'add-btn', 'notif-btn'].forEach(id => document.getElementById(id).style.display = 'flex');
-                if(document.getElementById('app-content').style.display === 'flex') document.getElementById('app-content').style.display = 'block';
-                document.getElementById('u-name').innerText = u;
-                render();
-            }
-        }
+    function login() {
+        const p = document.getElementById('pass').value.trim();
+        const enc = btoa(p);
+        if(keys[enc]) { 
+            localStorage.setItem("v_user", keys[enc]); 
+            initApp(); 
+        } else { alert("Access Denied"); }
+    }
 
-        function setSub(s, btn) {
-            activeSub = s;
-            document.querySelectorAll('.sub-pill').forEach(p => p.classList.remove('active'));
-            btn.classList.add('active');
+    function logout() {
+        localStorage.removeItem("v_user");
+        document.getElementById('main-header').style.display = 'none';
+        document.getElementById('app-content').style.display = 'none';
+        document.getElementById('add-btn').style.display = 'none';
+        document.getElementById('exit-screen').style.display = 'flex';
+    }
+
+    function backToLogin() {
+        document.getElementById('exit-screen').style.display = 'none';
+        document.getElementById('gate').style.display = 'flex';
+        document.getElementById('pass').value = "";
+    }
+
+    function initApp() {
+        const u = localStorage.getItem("v_user");
+        if(u) {
+            document.getElementById('gate').style.display = 'none';
+            document.getElementById('main-header').style.display = 'flex';
+            document.getElementById('app-content').style.display = 'block';
+            document.getElementById('add-btn').style.display = 'flex';
+            document.getElementById('u-name').innerText = u;
             render();
         }
+    }
 
-        function render() {
-            const grid = document.getElementById('main-grid');
-            const q = document.getElementById('search-bar').value.toLowerCase();
-            grid.innerHTML = "";
-            db.filter(i => (activeSub === "All" || i.subject === activeSub) && i.chapter.toLowerCase().includes(q)).forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <div style="font-size:10px; color:var(--accent); font-weight:900;">${item.subject.toUpperCase()}</div>
-                    <div style="font-size:1.3rem; font-weight:bold; margin:10px 0;">${item.chapter}</div>
-                    <div style="font-size:10px; color:var(--text-dim); border-top: 1px solid rgba(255,255,255,0.1); padding-top:10px;">
-                        Authors: ${item.authors.join(', ')}
-                    </div>
-                    <button class="btn-blue" style="width:auto; padding:8px 15px; margin-top:10px; font-size:11px;">VIEW (${item.imgs.length})</button>`;
-                grid.appendChild(card);
-            });
+    window.onload = initApp;
+
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function setSub(s, btn) {
+        activeSub = s;
+        document.querySelectorAll('.sub-pill').forEach(x => x.classList.remove('active'));
+        btn.classList.add('active');
+        render();
+    }
+
+    async function pushNotes() {
+        const sub = document.getElementById('f-sub').value;
+        const chap = document.getElementById('f-chap').value.trim();
+        const files = document.getElementById('f-files').files;
+        const user = localStorage.getItem("v_user");
+
+        if(!chap || files.length === 0) return alert("Select images and enter title!");
+        document.getElementById('up-btn').innerText = "Uploading...";
+
+        const imgPromises = Array.from(files).map(f => new Promise(r => {
+            const rd = new FileReader();
+            rd.onload = (e) => r({ src: e.target.result, by: user });
+            rd.readAsDataURL(f);
+        }));
+
+        const newImgs = await Promise.all(imgPromises);
+        const idx = db.findIndex(i => i.chapter.toLowerCase() === chap.toLowerCase() && i.subject === sub);
+
+        if(idx !== -1) {
+            db[idx].imgs.push(...newImgs);
+            if(!db[idx].authors.includes(user)) db[idx].authors.push(user);
+        } else {
+            db.unshift({ id: Date.now(), subject: sub, chapter: chap, authors: [user], imgs: newImgs });
         }
 
-        function toggleNotif(show) { 
-            const panel = document.getElementById('notif-overlay');
-            if(show) { panel.classList.add('open'); renderChats(); }
-            else { panel.classList.remove('open'); }
-        }
+        localStorage.setItem("v_db", JSON.stringify(db));
+        document.getElementById('up-btn').innerText = "Push to Cloud";
+        closeModal('up-modal');
+        render();
+    }
 
-        function closeAll(e) { document.getElementById('notif-overlay').classList.remove('open'); }
+    function render() {
+        const grid = document.getElementById('main-grid');
+        const q = document.getElementById('search-bar').value.toLowerCase();
+        grid.innerHTML = "";
+        const filtered = db.filter(i => (activeSub === "All" || i.subject === activeSub) && i.chapter.toLowerCase().includes(q));
 
-        async function pushNotes() {
-            const sub = document.getElementById('f-sub').value;
-            const chap = document.getElementById('f-chap').value.trim();
-            const files = document.getElementById('f-files').files;
-            const user = localStorage.getItem("v_user");
-            
-            if(!chap || files.length === 0) return alert("Enter Chapter Name & Select Images!");
+        filtered.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div style="font-size:10px; color:var(--accent); font-weight:bold;">${item.subject.toUpperCase()}</div>
+                <div style="font-size:1.2rem; font-weight:bold; margin: 10px 0;">${item.chapter}</div>
+                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #222; padding-top:10px;">
+                    <span style="font-size:9px; color:var(--text-dim)">By: ${item.authors.join(', ')}</span>
+                    <button class="btn btn-blue" onclick="openGallery(${item.id})">View (${item.imgs.length})</button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
 
-            const newImgs = await Promise.all(Array.from(files).map(f => new Promise(r => {
-                const rd = new FileReader(); 
-                rd.onload = (e) => r({src: e.target.result, by: user}); 
-                rd.readAsDataURL(f);
-            })));
+    function openGallery(id) {
+        const item = db.find(x => x.id === id);
+        const gal = document.getElementById('gallery');
+        const user = localStorage.getItem("v_user");
+        document.getElementById('pre-title').innerText = item.chapter;
+        
+        gal.innerHTML = item.imgs.map((img, i) => `
+            <div class="preview-img-box">
+                <img src="${img.src}" class="preview-img">
+                <div style="font-size:10px; margin:5px 0;">Uploaded by: ${img.by}</div>
+                <div style="display:flex; gap:5px;">
+                    <a href="${img.src}" download="${item.chapter}_P${i+1}.png" class="btn btn-blue" style="flex:1; text-align:center; text-decoration:none;">Download</a>
+                    ${img.by === user ? `<button onclick="delPage(${id}, ${i})" class="btn btn-red">Delete</button>` : ''}
+                </div>
+            </div>
+        `).join('');
+        openModal('pre-modal');
+    }
 
-            const idx = db.findIndex(i => i.chapter.toLowerCase() === chap.toLowerCase() && i.subject === sub);
-            if(idx !== -1) {
-                db[idx].imgs.push(...newImgs);
-                if(!db[idx].authors.includes(user)) db[idx].authors.push(user);
-            } else {
-                db.unshift({ id: Date.now(), subject: sub, chapter: chap, authors: [user], imgs: newImgs });
-            }
-            
-            chats.unshift({ user: user, text: `Uploaded ${chap} notes!`, time: new Date().toLocaleTimeString(), id: Date.now() });
+    function delPage(noteId, imgIdx) {
+        if(confirm("Delete this page?")) {
+            const note = db.find(x => x.id === noteId);
+            note.imgs.splice(imgIdx, 1);
+            if(note.imgs.length === 0) db = db.filter(x => x.id !== noteId);
             localStorage.setItem("v_db", JSON.stringify(db));
-            localStorage.setItem("v_notifs", JSON.stringify(chats));
-            closeModal('up-modal'); render();
+            render();
+            closeModal('pre-modal');
         }
-
-        function sendChat() {
-            const input = document.getElementById('chat-input');
-            if(!input.value.trim()) return;
-            chats.unshift({ user: localStorage.getItem("v_user"), text: input.value, time: new Date().toLocaleTimeString(), id: Date.now() });
-            localStorage.setItem("v_notifs", JSON.stringify(chats));
-            input.value = ""; renderChats();
-        }
-
-        function renderChats() {
-            document.getElementById('notif-list').innerHTML = chats.map(c => `
-                <div style="background:var(--glass); padding:15px; border-radius:18px; margin-bottom:12px; border:1px solid var(--glass-border); text-align:center;">
-                    <strong style="color:var(--accent); font-size:11px;">${c.user}</strong>
-                    <div style="margin:5px 0; font-size:14px;">${c.text}</div>
-                    <div style="font-size:9px; opacity:0.3;">${c.time}</div>
-                </div>`).join('');
-        }
-
-        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
-        window.onload = initApp;
-    </script>
+    }
+</script>
 </body>
 </html>
