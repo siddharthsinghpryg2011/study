@@ -9,54 +9,64 @@
             --bg: #050505; --card: #111; --accent: #3b82f6;
             --text: #fff; --text-dim: #94a3b8; --border: #222;
             --danger: #ef4444; --success: #10b981;
-            --transition: all 0.3s ease;
+            --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
 
-        /* Auth & Logout Screens */
+        /* Auth & Exit Screens */
         #gate, #exit-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; text-align: center; }
-        .lock-box { padding: 15px; width: 280px; border: 1px solid var(--border); border-radius: 12px; background: #000; color: white; margin-bottom: 20px; outline: none; }
+        .lock-box { padding: 15px; width: 280px; border: 1px solid var(--border); border-radius: 12px; background: #000; color: white; margin-bottom: 20px; outline: none; transition: var(--transition); }
 
         /* Header */
-        header { padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(5,5,5,0.8); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; }
-        .brand { font-size: 1.4rem; font-weight: 900; }
+        header { padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(5,5,5,0.8); backdrop-filter: blur(15px); position: sticky; top: 0; z-index: 1000; }
+        .brand { font-size: 1.4rem; font-weight: 900; letter-spacing: -1px; }
         .brand span { color: var(--accent); }
 
         /* Controls */
         .controls { max-width: 900px; margin: 20px auto; padding: 0 20px; }
         nav { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
-        .sub-pill { padding: 10px 22px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text-dim); cursor: pointer; white-space: nowrap; }
-        .sub-pill.active { background: var(--accent); color: white; border-color: var(--accent); }
+        .sub-pill { padding: 10px 22px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text-dim); cursor: pointer; white-space: nowrap; transition: var(--transition); }
+        .sub-pill.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
         
         #search-bar { width: 100%; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; color: white; outline: none; margin-bottom: 20px; box-sizing: border-box; }
 
         /* Grid */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 20px; max-width: 1200px; margin: auto; }
         .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px; transition: var(--transition); }
-        .card:hover { border-color: var(--accent); }
+        .card:hover { border-color: var(--accent); transform: translateY(-3px); }
 
-        /* Modal */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9000; align-items: center; justify-content: center; flex-direction: column; }
+        /* Notification Overlay (Activity Hub) */
+        #notif-overlay { position: fixed; right: -400px; top: 0; width: 320px; height: 100%; background: var(--card); border-left: 1px solid var(--border); z-index: 5000; transition: var(--transition); padding: 20px; display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
+        #notif-overlay.open { right: 0; }
+        .notif-msg { background: #000; padding: 10px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid var(--accent); position: relative; }
+        .del-chat-btn { position: absolute; top: 5px; right: 8px; background: none; border: 0; color: var(--danger); cursor: pointer; font-size: 18px; opacity: 0.5; }
+
+        /* Modals */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9000; align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(5px); }
         .modal-ui { background: var(--card); padding: 30px; border-radius: 20px; width: 320px; border: 1px solid var(--border); }
-        .modal-ui input, .modal-ui select { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; }
+        .modal-ui input, .modal-ui select { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; outline: none; }
 
         /* Gallery */
         .gallery-wrap { display: flex; gap: 20px; overflow-x: auto; width: 95%; padding: 20px; scroll-snap-type: x mandatory; }
-        .preview-img-box { flex: 0 0 auto; scroll-snap-align: center; text-align: center; width: 280px; }
-        .preview-img { width: 100%; border-radius: 10px; border: 1px solid var(--border); }
+        .preview-img-box { flex: 0 0 auto; scroll-snap-align: center; text-align: center; width: 280px; background: #000; border: 1px solid var(--border); padding: 10px; border-radius: 15px; }
+        .preview-img { width: 100%; border-radius: 10px; margin-bottom: 10px; }
 
+        /* Buttons */
         .btn { padding: 10px 15px; border-radius: 8px; border: 0; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.2s; }
         .btn-blue { background: var(--accent); color: white; }
         .btn-red { background: var(--danger); color: white; }
-        .fab { position: fixed; bottom: 30px; left: 30px; width: 60px; height: 60px; border-radius: 50%; border: 0; color: white; font-size: 24px; cursor: pointer; z-index: 2000; background: var(--accent); }
+        
+        .fab { position: fixed; width: 60px; height: 60px; border-radius: 50%; border: 0; color: white; font-size: 24px; cursor: pointer; z-index: 2000; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+        .add-fab { bottom: 30px; left: 30px; background: var(--accent); }
+        .notif-fab { bottom: 30px; right: 30px; background: #222; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
 <div id="gate">
-    <div class="brand" style="font-size: 3rem; margin-bottom: 20px;">VAULT<span>.10</span></div>
-    <input type="password" id="pass" class="lock-box" placeholder="Enter Access Key">
+    <div class="brand" style="font-size: 3.5rem; margin-bottom: 20px;">VAULT<span>.10</span></div>
+    <input type="password" id="pass" class="lock-box" placeholder="Access Key">
     <button onclick="login()" class="btn-blue" style="width:280px; padding:15px;">Authenticate</button>
 </div>
 
@@ -69,7 +79,7 @@
 <header id="main-header" style="display:none;">
     <div class="brand">VAULT<span>.10</span></div>
     <div style="text-align: right;">
-        <span id="u-name" style="font-weight:bold; display:block;">User</span>
+        <span id="u-name" style="font-weight:bold; display:block; color:var(--accent);">User</span>
         <span onclick="logout()" style="color:var(--danger); font-size:11px; cursor:pointer;">Secure Logout</span>
     </div>
 </header>
@@ -91,11 +101,9 @@
 
 <div id="up-modal" class="modal">
     <div class="modal-ui">
-        <h3 style="margin-top:0;">Add to Vault</h3>
-        <select id="f-sub">
-            <option>Maths</option><option>Science</option><option>SST</option><option>Hindi</option><option>English</option>
-        </select>
-        <input type="text" id="f-chap" placeholder="Chapter Name (Same name to merge)">
+        <h3 style="margin-top:0;">Add Notes</h3>
+        <select id="f-sub"><option>Maths</option><option>Science</option><option>SST</option><option>Hindi</option><option>English</option></select>
+        <input type="text" id="f-chap" placeholder="Chapter Name (Same to merge)">
         <input type="file" id="f-files" multiple accept="image/*">
         <button onclick="pushNotes()" id="up-btn" class="btn-blue" style="width:100%; margin-top:10px;">Push to Cloud</button>
         <button onclick="closeModal('up-modal')" style="width:100%; background:none; border:0; color:var(--text-dim); margin-top:10px; cursor:pointer;">Cancel</button>
@@ -110,14 +118,28 @@
     <div id="gallery" class="gallery-wrap"></div>
 </div>
 
-<button id="add-btn" class="fab" style="display:none;" onclick="openModal('up-modal')">+</button>
+<div id="notif-overlay">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h3>Activity Hub</h3>
+        <button onclick="toggleNotif(false)" style="background:none; border:0; color:white; font-size:25px;">&times;</button>
+    </div>
+    <div style="margin-bottom:15px;">
+        <input type="text" id="chat-input" class="lock-box" style="width:100%; font-size:12px; box-sizing:border-box;" placeholder="Type a message...">
+        <button onclick="sendChat()" class="btn-blue" style="width:100%; padding:8px; border-radius:8px;">Broadcast</button>
+    </div>
+    <div id="notif-list" style="overflow-y:auto; flex:1;"></div>
+</div>
+
+<button id="add-btn" class="fab add-fab" style="display:none;" onclick="openModal('up-modal')">+</button>
+<button id="notif-btn" class="fab notif-fab" style="display:none;" onclick="toggleNotif(true)">🔔</button>
 
 <script>
     const keys = { "U2lkIzl4WjI=": "Siddharth", "VGVqKjRrTDc=": "Tejeshwar", "QWp5JjFtUDU=": "Ajay" };
     let db = JSON.parse(localStorage.getItem("v_db")) || [];
+    let chats = JSON.parse(localStorage.getItem("v_notifs")) || [];
     let activeSub = "All";
 
-    // Suggestion logic: Border green if chapter exists
+    // Suggestion logic
     document.getElementById('f-chap').addEventListener('input', (e) => {
         const val = e.target.value.trim().toLowerCase();
         const sub = document.getElementById('f-sub').value;
@@ -128,10 +150,8 @@
     function login() {
         const p = document.getElementById('pass').value.trim();
         const enc = btoa(p);
-        if(keys[enc]) { 
-            localStorage.setItem("v_user", keys[enc]); 
-            initApp(); 
-        } else { alert("Access Denied"); }
+        if(keys[enc]) { localStorage.setItem("v_user", keys[enc]); initApp(); }
+        else { alert("Wrong Key!"); }
     }
 
     function logout() {
@@ -139,6 +159,7 @@
         document.getElementById('main-header').style.display = 'none';
         document.getElementById('app-content').style.display = 'none';
         document.getElementById('add-btn').style.display = 'none';
+        document.getElementById('notif-btn').style.display = 'none';
         document.getElementById('exit-screen').style.display = 'flex';
     }
 
@@ -155,6 +176,7 @@
             document.getElementById('main-header').style.display = 'flex';
             document.getElementById('app-content').style.display = 'block';
             document.getElementById('add-btn').style.display = 'flex';
+            document.getElementById('notif-btn').style.display = 'flex';
             document.getElementById('u-name').innerText = u;
             render();
         }
@@ -164,23 +186,18 @@
 
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    function setSub(s, btn) {
-        activeSub = s;
-        document.querySelectorAll('.sub-pill').forEach(x => x.classList.remove('active'));
-        btn.classList.add('active');
-        render();
-    }
+    function toggleNotif(show) { document.getElementById('notif-overlay').classList.toggle('open', show); if(show) renderChats(); }
 
     async function pushNotes() {
         const sub = document.getElementById('f-sub').value;
         const chap = document.getElementById('f-chap').value.trim();
-        const files = document.getElementById('f-files').files;
+        const fileInput = document.getElementById('f-files');
         const user = localStorage.getItem("v_user");
 
-        if(!chap || files.length === 0) return alert("Select images and enter title!");
-        document.getElementById('up-btn').innerText = "Uploading...";
+        if(!chap || fileInput.files.length === 0) return alert("Details missing!");
+        document.getElementById('up-btn').innerText = "Processing...";
 
-        const imgPromises = Array.from(files).map(f => new Promise(r => {
+        const imgPromises = Array.from(fileInput.files).map(f => new Promise(r => {
             const rd = new FileReader();
             rd.onload = (e) => r({ src: e.target.result, by: user });
             rd.readAsDataURL(f);
@@ -196,9 +213,12 @@
             db.unshift({ id: Date.now(), subject: sub, chapter: chap, authors: [user], imgs: newImgs });
         }
 
+        chats.unshift({ user: user, text: `Uploaded pages to: <b>${chap}</b>`, time: new Date().toLocaleTimeString() });
         localStorage.setItem("v_db", JSON.stringify(db));
-        document.getElementById('up-btn').innerText = "Push to Cloud";
+        localStorage.setItem("v_notifs", JSON.stringify(chats));
+
         closeModal('up-modal');
+        document.getElementById('up-btn').innerText = "Push to Cloud";
         render();
     }
 
@@ -212,46 +232,4 @@
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
-                <div style="font-size:10px; color:var(--accent); font-weight:bold;">${item.subject.toUpperCase()}</div>
-                <div style="font-size:1.2rem; font-weight:bold; margin: 10px 0;">${item.chapter}</div>
-                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #222; padding-top:10px;">
-                    <span style="font-size:9px; color:var(--text-dim)">By: ${item.authors.join(', ')}</span>
-                    <button class="btn btn-blue" onclick="openGallery(${item.id})">View (${item.imgs.length})</button>
-                </div>
-            `;
-            grid.appendChild(card);
-        });
-    }
-
-    function openGallery(id) {
-        const item = db.find(x => x.id === id);
-        const gal = document.getElementById('gallery');
-        const user = localStorage.getItem("v_user");
-        document.getElementById('pre-title').innerText = item.chapter;
-        
-        gal.innerHTML = item.imgs.map((img, i) => `
-            <div class="preview-img-box">
-                <img src="${img.src}" class="preview-img">
-                <div style="font-size:10px; margin:5px 0;">Uploaded by: ${img.by}</div>
-                <div style="display:flex; gap:5px;">
-                    <a href="${img.src}" download="${item.chapter}_P${i+1}.png" class="btn btn-blue" style="flex:1; text-align:center; text-decoration:none;">Download</a>
-                    ${img.by === user ? `<button onclick="delPage(${id}, ${i})" class="btn btn-red">Delete</button>` : ''}
-                </div>
-            </div>
-        `).join('');
-        openModal('pre-modal');
-    }
-
-    function delPage(noteId, imgIdx) {
-        if(confirm("Delete this page?")) {
-            const note = db.find(x => x.id === noteId);
-            note.imgs.splice(imgIdx, 1);
-            if(note.imgs.length === 0) db = db.filter(x => x.id !== noteId);
-            localStorage.setItem("v_db", JSON.stringify(db));
-            render();
-            closeModal('pre-modal');
-        }
-    }
-</script>
-</body>
-</html>
+                <div style="font-size:10px;
