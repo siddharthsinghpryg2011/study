@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vault.10 | Pro Study Hub</title>
+    <title>Vault.10 | Grouped Hub</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -14,282 +14,251 @@
         }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
         
-        /* Header & Navigation */
         header { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(5,5,5,0.8); backdrop-filter: blur(15px); position: sticky; top: 0; z-index: 1000; }
         .brand { font-size: 1.4rem; font-weight: 900; cursor: pointer; letter-spacing: -1px; }
         .brand span { color: var(--accent); }
         
         .controls { max-width: 900px; margin: 15px auto; padding: 0 15px; }
-        #search-bar { width: 100%; padding: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; color: white; outline: none; margin-bottom: 15px; box-sizing: border-box; transition: 0.3s; }
-        #search-bar:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
+        #search-bar { width: 100%; padding: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; color: white; outline: none; margin-bottom: 15px; box-sizing: border-box; }
         
         nav { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
         .sub-pill { padding: 8px 18px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text-dim); cursor: pointer; white-space: nowrap; font-size: 13px; font-weight: 600; }
         .sub-pill.active { background: var(--accent); color: white; border-color: var(--accent); }
 
-        /* Grid & Cards */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; padding: 15px; max-width: 1200px; margin: auto; }
-        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
-        
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 15px; overflow: hidden; transition: 0.3s; }
-        .card:hover { border-color: #444; transform: translateY(-2px); }
-        .card-header { padding: 12px 15px; background: #1a1a1a; border-bottom: 1px solid var(--border); font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 15px; overflow: hidden; }
+        .card-header { padding: 12px 15px; background: #1a1a1a; border-bottom: 1px solid var(--border); font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
         .card-body { padding: 15px; }
-        .note-info { display: flex; justify-content: space-between; align-items: center; }
         .author-tag { font-size: 11px; background: #222; padding: 4px 8px; border-radius: 6px; color: var(--accent); font-weight: bold; }
 
-        /* Responsive Preview Modal */
+        /* Modal & Preview */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9000; flex-direction: column; }
-        .modal-header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; background: #000; }
+        .modal-header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: #000; border-bottom: 1px solid #222; }
         #gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; padding: 20px; overflow-y: auto; flex: 1; }
         .preview-item { background: #151515; border-radius: 12px; padding: 12px; border: 1px solid #222; text-align: center; }
-        .preview-item img, .preview-item iframe { width: 100%; height: 250px; border-radius: 8px; object-fit: contain; background: #000; margin-bottom: 12px; border: 0; }
-        .btn-download { display: block; width: 100%; padding: 12px; background: var(--success); color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 13px; margin-top: 5px; }
+        .preview-item img, .preview-item iframe { width: 100%; height: 300px; border-radius: 8px; object-fit: contain; background: #000; margin-bottom: 12px; border: 0; }
+        .btn-download { display: inline-block; width: 45%; padding: 12px; background: var(--success); color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; border: 0; }
 
-        /* Overlay & Toasts */
-        #hub-overlay { position: fixed; right: -100%; top: 0; width: 100%; max-width: 350px; height: 100%; background: var(--card); border-left: 1px solid var(--border); z-index: 5000; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); padding: 20px; display: flex; flex-direction: column; box-sizing: border-box; }
-        #hub-overlay.open { right: 0; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
-        .toast { position: fixed; top: 20px; right: 20px; background: var(--accent); color: white; padding: 12px 20px; border-radius: 10px; z-index: 11000; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.3); animation: slideIn 0.3s ease-out; }
+        /* Hub & Toasts */
+        #hub-overlay { position: fixed; right: -100%; top: 0; width: 100%; max-width: 350px; height: 100%; background: var(--card); border-left: 1px solid var(--border); z-index: 5000; transition: 0.4s; padding: 20px; display: flex; flex-direction: column; box-sizing: border-box; }
+        #hub-overlay.open { right: 0; }
+        .toast { position: fixed; top: 20px; right: 20px; background: var(--accent); color: white; padding: 12px 20px; border-radius: 10px; z-index: 11000; font-weight: bold; animation: slideIn 0.3s; }
 
-        /* Floating Actions */
-        .fab { position: fixed; border-radius: 50px; border: 0; color: white; cursor: pointer; z-index: 2000; display: flex; align-items: center; justify-content: center; font-weight: bold; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        .fab { position: fixed; border-radius: 50px; border: 0; color: white; cursor: pointer; z-index: 2000; display: flex; align-items: center; justify-content: center; font-weight: bold; }
         .add-fab { bottom: 20px; left: 20px; width: 55px; height: 55px; background: var(--accent); font-size: 28px; }
-        .hub-fab { bottom: 85px; right: 20px; width: 50px; height: 50px; background: #222; border: 1px solid #333; }
-        .logout-btn { bottom: 20px; right: 20px; padding: 12px 25px; background: var(--danger); font-size: 12px; letter-spacing: 1px; }
+        .logout-btn { bottom: 20px; right: 20px; padding: 12px 25px; background: var(--danger); font-size: 12px; border-radius: 30px; }
+        .hub-btn { bottom: 85px; right: 20px; width: 50px; height: 50px; background: #222; border: 1px solid #333; border-radius: 50%; }
 
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
     </style>
 </head>
 <body>
 
-<div id="gate" style="position:fixed; inset:0; background:var(--bg); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+<div id="gate" style="position:fixed; inset:0; background:var(--bg); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
     <h1 style="font-size:3rem; margin:0;">VAULT<span>.10</span></h1>
-    <p style="color:var(--text-dim); margin-bottom:30px;">Class 10 Study Repository</p>
-    <input type="password" id="pass" placeholder="Enter Access Key" style="padding:16px; width:280px; border-radius:12px; background:#111; border:1px solid #333; color:white; margin-bottom:20px; outline:none; text-align:center; font-size:16px;">
-    <button onclick="login()" style="width:280px; padding:16px; background:var(--accent); color:white; border:0; border-radius:12px; font-weight:900; cursor:pointer;">ACCESS VAULT</button>
+    <input type="password" id="pass" placeholder="Access Key" style="padding:15px; width:250px; border-radius:10px; background:#111; border:1px solid #333; color:white; margin:20px 0; text-align:center;">
+    <button onclick="login()" style="width:250px; padding:15px; background:var(--accent); color:white; border:0; border-radius:10px; font-weight:bold;">ENTER</button>
 </div>
 
 <header>
-    <div class="brand" onclick="sync()">VAULT<span>.10</span></div>
-    <div style="display:flex; align-items:center; gap:10px;">
-        <span id="u-name" style="font-weight:900; font-size:13px; color:var(--text-dim);">USER</span>
-        <div style="width:8px; height:8px; background:var(--success); border-radius:50%;"></div>
-    </div>
+    <div class="brand" onclick="location.reload()">VAULT<span>.10</span></div>
+    <div id="u-display" style="font-weight:bold; color:var(--text-dim); font-size:12px;"></div>
 </header>
 
 <div class="controls">
-    <input type="text" id="search-bar" placeholder="Search by chapter (e.g. Real Numbers)" oninput="render()">
+    <input type="text" id="search-bar" placeholder="Search chapter..." oninput="render()">
     <nav id="subject-nav">
-        <button class="sub-pill active" onclick="setSub('All', this)">All Subjects</button>
+        <button class="sub-pill active" onclick="setSub('All', this)">All</button>
         <button class="sub-pill" onclick="setSub('Maths', this)">Maths</button>
         <button class="sub-pill" onclick="setSub('Science', this)">Science</button>
         <button class="sub-pill" onclick="setSub('SST', this)">SST</button>
-        <button class="sub-pill" onclick="setSub('Hindi', this)">Hindi</button>
         <button class="sub-pill" onclick="setSub('English', this)">English</button>
     </nav>
 </div>
 
 <div id="main-grid" class="grid"></div>
 
-<div id="up-modal" class="modal" style="justify-content:center; align-items:center; background:rgba(0,0,0,0.9);">
-    <div style="background:var(--card); padding:30px; border-radius:20px; width:90%; max-width:400px; border:1px solid var(--border);">
-        <h2 style="margin-top:0;">Upload Notes</h2>
-        <label style="font-size:12px; color:var(--text-dim);">Select Subject</label>
-        <select id="f-sub" style="width:100%; padding:12px; margin:8px 0 15px; background:#000; border:1px solid #333; color:white; border-radius:8px;"><option>Maths</option><option>Science</option><option>SST</option><option>Hindi</option><option>English</option></select>
-        <label style="font-size:12px; color:var(--text-dim);">Chapter Name</label>
-        <input type="text" id="f-chap" placeholder="e.g. Life Processes" style="width:100%; padding:12px; margin:8px 0 15px; background:#000; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
-        <label style="font-size:12px; color:var(--text-dim);">Select Images or PDF</label>
-        <input type="file" id="f-files" multiple accept="image/*,.pdf" style="width:100%; padding:10px; margin:8px 0 20px; color:var(--text-dim);">
-        <button onclick="pushNotes()" id="up-btn" style="width:100%; padding:15px; background:var(--accent); color:white; border:0; border-radius:10px; font-weight:bold; cursor:pointer;">START UPLOAD</button>
-        <button onclick="closeModal('up-modal')" style="width:100%; background:none; border:0; color:var(--text-dim); margin-top:15px; cursor:pointer;">Cancel</button>
+<div id="up-modal" class="modal" style="justify-content:center; align-items:center;">
+    <div style="background:var(--card); padding:25px; border-radius:20px; width:90%; max-width:380px; border:1px solid var(--border);">
+        <h3>Upload Notes</h3>
+        <select id="f-sub" style="width:100%; padding:12px; background:#000; color:white; border:1px solid #333; border-radius:8px; margin-bottom:15px;">
+            <option>Maths</option><option>Science</option><option>SST</option><option>English</option><option>Hindi</option>
+        </select>
+        <input type="text" id="f-chap" placeholder="Chapter Name (Exact case)" style="width:100%; padding:12px; background:#000; color:white; border:1px solid #333; border-radius:8px; margin-bottom:15px; box-sizing:border-box;">
+        <input type="file" id="f-files" multiple accept="image/*,.pdf" style="margin-bottom:20px; font-size:12px;">
+        <button onclick="pushNotes()" id="up-btn" style="width:100%; padding:15px; background:var(--accent); color:white; border:0; border-radius:10px; font-weight:bold;">UPLOAD</button>
+        <button onclick="closeModal('up-modal')" style="width:100%; background:none; border:0; color:var(--text-dim); margin-top:10px;">Cancel</button>
     </div>
 </div>
 
 <div id="pre-modal" class="modal">
     <div class="modal-header">
         <h3 id="pre-title" style="margin:0;">PREVIEW</h3>
-        <button onclick="closeModal('pre-modal')" style="background:none; border:0; color:white; font-size:35px; cursor:pointer;">&times;</button>
+        <button onclick="closeModal('pre-modal')" style="background:none; border:0; color:white; font-size:30px;">&times;</button>
     </div>
     <div id="gallery"></div>
 </div>
 
 <div id="hub-overlay">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h2 style="margin:0;">Activity Hub</h2>
-        <button onclick="toggleHub(false)" style="background:none; border:0; color:white; font-size:30px; cursor:pointer;">&times;</button>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2>Activity Hub</h2>
+        <button onclick="toggleHub(false)" style="background:none; border:0; color:white; font-size:25px;">&times;</button>
     </div>
-    <div style="margin-bottom:20px;">
-        <input type="text" id="chat-input" placeholder="Type a message..." style="width:100%; padding:14px; background:#000; border:1px solid #333; color:white; border-radius:10px; box-sizing:border-box;">
-        <button onclick="sendChat()" style="width:100%; padding:12px; background:var(--accent); border:0; border-radius:10px; color:white; margin-top:10px; font-weight:bold;">SEND MESSAGE</button>
-    </div>
-    <div id="hub-list" style="overflow-y:auto; flex:1; scrollbar-width:none;"></div>
+    <div id="hub-list" style="flex:1; overflow-y:auto; margin:15px 0;"></div>
+    <input type="text" id="chat-input" placeholder="Say something..." style="width:100%; padding:12px; background:#000; border:1px solid #333; color:white; border-radius:8px;">
+    <button onclick="sendChat()" style="width:100%; padding:12px; background:var(--accent); color:white; border:0; border-radius:8px; margin-top:10px; font-weight:bold;">SEND</button>
 </div>
 
 <button class="fab add-fab" onclick="openModal('up-modal')">+</button>
-<button class="fab hub-fab" onclick="toggleHub(true)">🔔</button>
+<button class="fab hub-btn" onclick="toggleHub(true)">🔔</button>
 <button class="fab logout-btn" onclick="logout()">LOGOUT</button>
 
 <script>
-    // Configuration
     const SB_URL = "https://eqzkbvktpwzoojhsubum.supabase.co";
     const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxemtidmt0cHd6b29qaHN1YnVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4ODIxMTAsImV4cCI6MjA4OTQ1ODExMH0.9Oaw3NH3ponUEJL9mKWSgccxA8eyNaie4mfwN1E_8b8";
     const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
     const keys = { "U2lkIzl4WjI=": "Siddharth", "VGVqKjRrTDc=": "Tejeshwar", "QWp5JjFtUDU=": "Ajay", "SXNoKjlNMmI=": "Ishmeet" };
-    let db = []; let chats = []; let activeSub = "All";
+    let db = []; let activeSub = "All";
 
-    // Auth Logic
     function login() {
-        const p = document.getElementById('pass').value.trim();
-        const encoded = btoa(p);
-        if(keys[encoded]) { 
-            localStorage.setItem("v_user", keys[encoded]); 
-            location.reload(); 
-        } else alert("Invalid Access Key!");
+        const p = document.getElementById('pass').value;
+        if(keys[btoa(p)]) { localStorage.setItem("v_user", keys[btoa(p)]); location.reload(); }
+        else alert("Wrong Key!");
     }
     function logout() { localStorage.removeItem("v_user"); location.reload(); }
 
     window.onload = () => {
-        const u = localStorage.getItem("v_user");
-        if(u) { 
-            document.getElementById('gate').style.display = 'none'; 
-            document.getElementById('u-name').innerText = u.toUpperCase(); 
-            sync(); 
+        const user = localStorage.getItem("v_user");
+        if(user) {
+            document.getElementById('gate').style.display = 'none';
+            document.getElementById('u-display').innerText = user.toUpperCase();
+            sync();
             setupNotifications();
         }
     };
 
-    // Data Sync
     async function sync() {
-        const { data: nData } = await supabaseClient.from('notes_table').select('*').order('id', { ascending: false });
-        if(nData) { db = nData; render(); }
-        const { data: cData } = await supabaseClient.from('messages').select('*').order('id', { ascending: false }).limit(40);
-        if(cData) { chats = cData; renderHub(); }
+        const { data: n } = await supabaseClient.from('notes_table').select('*').order('id', {ascending: false});
+        if(n) { db = n; render(); }
+        const { data: m } = await supabaseClient.from('messages').select('*').order('id', {ascending: false}).limit(20);
+        if(m) renderHub(m);
     }
 
-    // Real-time Notifications
     function setupNotifications() {
-        supabaseClient.channel('any').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notes_table' }, payload => {
-            showToast(`🚀 New Note: ${payload.new.chapter} by ${payload.new.author}`);
-            sync();
-        }).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
-            if(payload.new.sender_name !== localStorage.getItem("v_user")) {
-                showToast(`💬 ${payload.new.sender_name}: ${payload.new.content.substring(0,20)}...`);
-            }
+        supabaseClient.channel('custom-all-channel')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notes_table' }, payload => {
+            showToast(`🚀 New Note in ${payload.new.chapter}!`);
             sync();
         }).subscribe();
     }
 
     function showToast(msg) {
-        const t = document.createElement('div');
-        t.className = "toast"; t.innerText = msg;
-        document.body.appendChild(t);
-        setTimeout(() => t.remove(), 4000);
+        const t = document.createElement('div'); t.className="toast"; t.innerText=msg;
+        document.body.appendChild(t); setTimeout(()=>t.remove(), 4000);
     }
 
-    // Upload Logic (Images + PDF)
-    async function pushNotes() {
-        const sub = document.getElementById('f-sub').value, 
-              chap = document.getElementById('f-chap').value.trim(), 
-              fileInput = document.getElementById('f-files');
-        
-        if(!chap || fileInput.files.length === 0) return alert("Please provide chapter name and files!");
-        
-        const btn = document.getElementById('up-btn'); btn.innerText = "UPLOADING..."; btn.disabled = true;
-
-        try {
-            const urls = [];
-            for (let i = 0; i < fileInput.files.length; i++) {
-                const file = fileInput.files[i];
-                const ext = file.name.split('.').pop();
-                const path = `notes/${sub}/${Date.now()}_${i}.${ext}`;
-                
-                const { error: upErr } = await supabaseClient.storage.from('note-images').upload(path, file);
-                if(upErr) throw upErr;
-                
-                const { data } = supabaseClient.storage.from('note-images').getPublicUrl(path);
-                urls.push(data.publicUrl);
-            }
-            await supabaseClient.from('notes_table').insert([{ subject: sub, chapter: chap.toLowerCase(), author: localStorage.getItem("v_user"), pages: urls }]);
-            closeModal('up-modal'); sync();
-            document.getElementById('f-chap').value = ""; document.getElementById('f-files').value = "";
-        } catch(e) { alert("Upload Failed: " + e.message); }
-        btn.innerText = "START UPLOAD"; btn.disabled = false;
-    }
-
-    // Render Logic
+    // Grouping Logic: Same Chapter = One Card
     function render() {
-        const grid = document.getElementById('main-grid'), q = document.getElementById('search-bar').value.toLowerCase();
+        const grid = document.getElementById('main-grid');
+        const query = document.getElementById('search-bar').value.toLowerCase();
         grid.innerHTML = "";
-        
-        const filtered = db.filter(i => (activeSub === "All" || i.subject === activeSub) && i.chapter.includes(q));
-        
-        filtered.forEach(item => {
+
+        const grouped = {};
+        db.forEach(item => {
+            if((activeSub === "All" || item.subject === activeSub) && item.chapter.toLowerCase().includes(query)) {
+                if(!grouped[item.chapter]) {
+                    grouped[item.chapter] = { ...item, allPages: [...item.pages], authors: [item.author] };
+                } else {
+                    grouped[item.chapter].allPages.push(...item.pages);
+                    if(!grouped[item.chapter].authors.includes(item.author)) grouped[item.chapter].authors.push(item.author);
+                }
+            }
+        });
+
+        Object.values(grouped).forEach(item => {
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
-                <div class="card-header">
-                    <span>${item.chapter.toUpperCase()}</span>
-                    <small style="color:var(--accent)">${item.subject}</small>
-                </div>
+                <div class="card-header"><span>${item.chapter}</span><small>${item.subject}</small></div>
                 <div class="card-body">
-                    <div class="note-info">
-                        <span class="author-tag">BY ${item.author}</span>
-                        <div style="display:flex; gap:8px;">
-                            <button class="btn-action btn-view" style="padding:8px 15px; background:var(--accent); border:0; color:white; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="viewPages(${item.id})">VIEW</button>
-                            ${item.author === localStorage.getItem("v_user") ? `<button onclick="deleteNote(${item.id})" style="background:none; border:0; color:var(--danger); cursor:pointer; font-weight:bold;">DEL</button>` : ''}
-                        </div>
-                    </div>
+                    <p style="font-size:11px; color:var(--text-dim); margin:0 0 10px;">Authors: ${item.authors.join(', ')}</p>
+                    <button onclick="viewGrouped('${encodeURIComponent(JSON.stringify(item.allPages))}', '${item.chapter}')" style="width:100%; padding:10px; background:var(--accent); border:0; color:white; border-radius:8px; font-weight:bold; cursor:pointer;">VIEW ALL (${item.allPages.length})</button>
                 </div>`;
             grid.appendChild(card);
         });
     }
 
-    function viewPages(id) {
-        const note = db.find(n => n.id === id);
+    // Real Download Handler
+    async function triggerDownload(url, name) {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const bUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = bUrl; a.download = name;
+        document.body.appendChild(a); a.click();
+        window.URL.revokeObjectURL(bUrl); a.remove();
+    }
+
+    function viewGrouped(pagesJson, title) {
+        const pages = JSON.parse(decodeURIComponent(pagesJson));
         const gal = document.getElementById('gallery');
-        document.getElementById('pre-title').innerText = note.chapter.toUpperCase();
-        
-        gal.innerHTML = note.pages.map((p, idx) => {
+        document.getElementById('pre-title').innerText = title;
+        gal.innerHTML = pages.map((p, i) => {
             const isPDF = p.toLowerCase().endsWith('.pdf');
             return `
                 <div class="preview-item">
                     ${isPDF ? `<iframe src="${p}#toolbar=0"></iframe>` : `<img src="${p}" loading="lazy">`}
-                    <div style="display:flex; gap:10px;">
-                        <a href="${p}" target="_blank" class="btn-download" style="background:#444;">FULL VIEW</a>
-                        <a href="${p}" download class="btn-download">DOWNLOAD</a>
+                    <div style="display:flex; gap:10px; justify-content:center;">
+                        <a href="${p}" target="_blank" class="btn-download" style="background:#333;">FULL VIEW</a>
+                        <button onclick="triggerDownload('${p}', '${title}_p${i+1}')" class="btn-download">DOWNLOAD</button>
                     </div>
                 </div>`;
         }).join('');
         openModal('pre-modal');
     }
 
-    // Chat Logic
+    async function pushNotes() {
+        const sub = document.getElementById('f-sub').value, 
+              chap = document.getElementById('f-chap').value.trim(), 
+              files = document.getElementById('f-files').files;
+        if(!chap || files.length === 0) return alert("Fill details!");
+        
+        const btn = document.getElementById('up-btn'); btn.innerText = "UPLOADING..."; btn.disabled = true;
+        try {
+            const urls = [];
+            for (let i = 0; i < files.length; i++) {
+                const f = files[i];
+                const path = `notes/${sub}/${Date.now()}_${i}.${f.name.split('.').pop()}`;
+                await supabaseClient.storage.from('note-images').upload(path, f);
+                const { data } = supabaseClient.storage.from('note-images').getPublicUrl(path);
+                urls.push(data.publicUrl);
+            }
+            await supabaseClient.from('notes_table').insert([{ subject: sub, chapter: chap, author: localStorage.getItem("v_user"), pages: urls }]);
+            closeModal('up-modal'); sync();
+        } catch(e) { alert("Error: " + e.message); }
+        btn.innerText = "UPLOAD"; btn.disabled = false;
+    }
+
     async function sendChat() {
-        const input = document.getElementById('chat-input'), user = localStorage.getItem("v_user");
-        if(!input.value.trim()) return;
-        await supabaseClient.from('messages').insert([{ sender_name: user, content: input.value.trim() }]);
+        const input = document.getElementById('chat-input');
+        if(!input.value) return;
+        await supabaseClient.from('messages').insert([{ sender_name: localStorage.getItem("v_user"), content: input.value }]);
         input.value = ""; sync();
     }
 
-    function renderHub() {
-        const me = localStorage.getItem("v_user");
-        document.getElementById('hub-list').innerHTML = chats.map(c => `
-            <div style="background:#000; padding:12px; border-radius:12px; margin-bottom:10px; border-left:4px solid ${c.sender_name === me ? 'var(--accent)' : '#444'};">
-                <div style="display:flex; justify-content:space-between;">
-                    <small style="font-weight:900; color:var(--accent);">${c.sender_name}</small>
-                    <small style="color:#444; font-size:10px;">${new Date(c.created_at).toLocaleTimeString()}</small>
-                </div>
-                <div style="font-size:13px; margin-top:5px; color:#ddd;">${c.content}</div>
+    function renderHub(msgs) {
+        document.getElementById('hub-list').innerHTML = msgs.map(m => `
+            <div style="background:#000; padding:10px; border-radius:8px; margin-bottom:8px; border-left:3px solid var(--accent);">
+                <small style="color:var(--accent); font-weight:bold;">${m.sender_name}</small>
+                <div style="font-size:13px;">${m.content}</div>
             </div>`).join('');
     }
 
-    // Helpers
-    async function deleteNote(id) { if(confirm("Permanently delete these notes?")) { await supabaseClient.from('notes_table').delete().eq('id', id); sync(); } }
-    function setSub(s, b) { activeSub = s; document.querySelectorAll('.sub-pill').forEach(x => x.classList.remove('active')); b.classList.add('active'); render(); }
-    function toggleHub(s) { document.getElementById('hub-overlay').classList.toggle('open', s); }
+    function setSub(s, b) { activeSub = s; document.querySelectorAll('.sub-pill').forEach(x=>x.classList.remove('active')); b.classList.add('active'); render(); }
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function toggleHub(s) { document.getElementById('hub-overlay').classList.toggle('open', s); }
 </script>
 </body>
 </html>
