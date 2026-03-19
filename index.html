@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vault.10 | Private Study Cloud</title>
+    <title>Vault.10 | Supabase Cloud</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --bg: #050505; --card: #111111; --accent: #3b82f6;
@@ -11,48 +12,37 @@
             --danger: #ef4444; --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
-        
         header { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(5,5,5,0.8); backdrop-filter: blur(15px); position: sticky; top: 0; z-index: 1000; }
         .brand { font-size: 1.2rem; font-weight: 900; cursor: pointer; }
         .brand span { color: var(--accent); }
-
         .controls { max-width: 900px; margin: 15px auto; padding: 0 15px; }
-        #search-bar { width: 100%; padding: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; color: white; outline: none; margin-bottom: 15px; box-sizing: border-box; }
-        
+        #search-bar { width: 100%; padding: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; color: white; outline: none; margin-bottom: 15px; box-sizing: border-box; transition: 0.3s; }
+        #search-bar:focus { border-color: var(--accent); }
         nav { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
         .sub-pill { padding: 8px 18px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text-dim); cursor: pointer; white-space: nowrap; font-size: 13px; }
         .sub-pill.active { background: var(--accent); color: white; border-color: var(--accent); }
-
-        /* Mobile Responsive Grid */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); gap: 15px; padding: 15px; max-width: 1200px; margin: auto; }
         @media (min-width: 600px) { .grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); } }
-
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 15px; overflow: hidden; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 15px; overflow: hidden; transition: 0.3s; }
         .card-header { padding: 12px 15px; background: #1a1a1a; border-bottom: 1px solid var(--border); font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
-        
         .card-body { padding: 10px 15px; }
-        .note-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #222; gap: 10px; }
+        .note-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #222; gap: 10px; }
         .note-row:last-child { border: 0; }
-        
         .actions { display: flex; gap: 5px; }
         .btn-action { padding: 6px 12px; border-radius: 6px; border: 0; cursor: pointer; font-size: 11px; font-weight: bold; color: white; }
         .btn-view { background: var(--accent); }
         .btn-del { background: var(--danger); }
-        
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 9000; align-items: center; justify-content: center; padding: 10px; flex-direction: column; }
         .modal-ui { background: var(--card); padding: 25px; border-radius: 20px; width: 100%; max-width: 340px; border: 1px solid var(--border); }
         .modal-ui input, .modal-ui select { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; }
-
         #hub-overlay { position: fixed; right: -100%; top: 0; width: 100%; max-width: 320px; height: 100%; background: var(--card); border-left: 1px solid var(--border); z-index: 5000; transition: 0.4s; padding: 20px; display: flex; flex-direction: column; box-sizing: border-box; }
         #hub-overlay.open { right: 0; }
-        
-        .fab { position: fixed; width: 50px; height: 50px; border-radius: 50%; border: 0; color: white; cursor: pointer; z-index: 2000; display: flex; align-items: center; justify-content: center; }
+        .fab { position: fixed; width: 50px; height: 50px; border-radius: 50%; border: 0; color: white; cursor: pointer; z-index: 2000; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
         .add-fab { bottom: 20px; left: 20px; background: var(--accent); font-size: 24px; }
         .hub-fab { bottom: 85px; right: 20px; background: #222; border: 1px solid var(--border); }
         .logout-fab { bottom: 20px; right: 20px; background: var(--danger); }
-
         .msg-box { background: #000; padding: 10px; border-radius: 10px; margin-bottom: 10px; border-left: 3px solid var(--accent); position: relative; }
-        .msg-del { position: absolute; top: 5px; right: 8px; color: var(--danger); cursor: pointer; font-size: 14px; }
+        .msg-del { position: absolute; top: 5px; right: 8px; color: var(--danger); cursor: pointer; font-size: 16px; }
     </style>
 </head>
 <body>
@@ -67,12 +57,11 @@
     <div class="brand" onclick="sync()">VAULT<span>.10</span></div>
     <div style="text-align: right;">
         <span id="u-name" style="font-weight:bold; font-size:14px;">User</span>
-        <span onclick="openModal('settings-modal')" style="color:var(--accent); font-size:10px; cursor:pointer; display:block;">Cloud Config</span>
     </div>
 </header>
 
 <div class="controls">
-    <input type="text" id="search-bar" placeholder="Search chapter..." oninput="render()">
+    <input type="text" id="search-bar" placeholder="Search by chapter name..." oninput="render()">
     <nav>
         <button class="sub-pill active" onclick="setSub('All', this)">All</button>
         <button class="sub-pill" onclick="setSub('Maths', this)">Maths</button>
@@ -84,17 +73,6 @@
 </div>
 
 <div id="main-grid" class="grid"></div>
-
-<div id="settings-modal" class="modal">
-    <div class="modal-ui">
-        <h3>Settings</h3>
-        <input type="password" id="set-token" placeholder="GitHub Token">
-        <input type="text" id="set-user" placeholder="Username">
-        <input type="text" id="set-repo" placeholder="Repo Name">
-        <button onclick="saveSettings()" style="width:100%; padding:12px; background:var(--accent); color:white; border:0; border-radius:8px;">Save</button>
-        <button onclick="closeModal('settings-modal')" style="width:100%; background:none; border:0; color:var(--text-dim); margin-top:10px;">Close</button>
-    </div>
-</div>
 
 <div id="up-modal" class="modal">
     <div class="modal-ui">
@@ -121,7 +99,7 @@
         <button onclick="toggleHub(false)" style="background:none; border:0; color:white; font-size:25px;">&times;</button>
     </div>
     <div style="margin-bottom:15px;">
-        <input type="text" id="chat-input" placeholder="Say something..." style="width:100%; padding:12px; background:#000; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
+        <input type="text" id="chat-input" placeholder="Say something...">
         <button onclick="sendChat()" style="width:100%; padding:10px; background:var(--accent); border:0; border-radius:8px; color:white; margin-top:8px; font-weight:bold;">Send</button>
     </div>
     <div id="hub-list" style="overflow-y:auto; flex:1; scrollbar-width:none;"></div>
@@ -132,6 +110,10 @@
 <button class="fab logout-fab" onclick="logout()"><svg viewBox="0 0 24 24" style="width:22px; height:22px; fill:white;"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg></button>
 
 <script>
+    const SB_URL = "https://eqzkbvktpwzoojhsubum.supabase.co";
+    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxemtidmt0cHd6b29qaHN1YnVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4ODIxMTAsImV4cCI6MjA4OTQ1ODExMH0.9Oaw3NH3ponUEJL9mKWSgccxA8eyNaie4mfwN1E_8b8";
+    const supabase = exports.supabase.createClient(SB_URL, SB_KEY);
+
     const keys = { "U2lkIzl4WjI=": "Siddharth", "VGVqKjRrTDc=": "Tejeshwar", "QWp5JjFtUDU=": "Ajay", "SXNoKjlNMmI=": "Ishmeet" };
     let db = []; let chats = []; let activeSub = "All";
 
@@ -142,68 +124,38 @@
     }
     function logout() { localStorage.removeItem("v_user"); location.reload(); }
 
-    function saveSettings() {
-        localStorage.setItem("gh_token", document.getElementById('set-token').value);
-        localStorage.setItem("gh_user", document.getElementById('set-user').value);
-        localStorage.setItem("gh_repo", document.getElementById('set-repo').value);
-        alert("Config Saved!"); sync(); closeModal('settings-modal');
-    }
-
-    async function gh(path, method = "GET", body = null) {
-        const t = localStorage.getItem("gh_token"), u = localStorage.getItem("gh_user"), r = localStorage.getItem("gh_repo");
-        if(!t || !u || !r) return { ok: false };
-        const url = `https://api.github.com/repos/${u}/${r}/contents/${path}`;
-        try {
-            const res = await fetch(url, {
-                method, headers: { "Authorization": `token ${t}`, "Accept": "application/vnd.github.v3+json" },
-                body: body ? JSON.stringify(body) : null
-            });
-            return res;
-        } catch(e) { return { ok: false }; }
-    }
-
     window.onload = () => {
         const u = localStorage.getItem("v_user");
         if(u) { document.getElementById('gate').style.display = 'none'; document.getElementById('u-name').innerText = u; sync(); }
     };
 
     async function sync() {
-        const res = await gh("data");
-        if (res.ok) {
-            const files = await res.json();
-            db = [];
-            for (let f of files) { 
-                if (f.name.endsWith('.json') && f.name !== '.gitkeep') {
-                    const dRes = await fetch(f.download_url + "?t=" + Date.now());
-                    db.push(await dRes.json());
-                }
-            }
-            render();
-        }
-        const hRes = await gh("hub_chat.json");
-        if (hRes.ok) { chats = JSON.parse(atob((await hRes.json()).content)); renderHub(); }
+        const { data: nData } = await supabase.from('notes_table').select('*').order('id', { ascending: false });
+        if(nData) { db = nData; render(); }
+        const { data: cData } = await supabase.from('messages').select('*').order('id', { ascending: false }).limit(30);
+        if(cData) { chats = cData; renderHub(); }
     }
 
     async function pushNotes() {
         const sub = document.getElementById('f-sub').value, chap = document.getElementById('f-chap').value.trim().toLowerCase(), fileInput = document.getElementById('f-files');
         if(!chap || fileInput.files.length === 0) return alert("Pura fill karein!");
         
-        const btn = document.getElementById('up-btn'); btn.innerText = "Syncing..."; btn.disabled = true;
+        const btn = document.getElementById('up-btn'); btn.innerText = "Uploading Photos..."; btn.disabled = true;
 
-        const imgs = await Promise.all(Array.from(fileInput.files).map(f => new Promise(r => {
-            const rd = new FileReader(); rd.onload = e => r(e.target.result); rd.readAsDataURL(f);
-        })));
+        try {
+            const uploadedUrls = [];
+            for (let i = 0; i < fileInput.files.length; i++) {
+                const file = fileInput.files[i];
+                const path = `notes/${sub}/${Date.now()}_${i}.png`;
+                const { data, error } = await supabase.storage.from('note-images').upload(path, file);
+                if(error) throw error;
+                const { data: url } = supabase.storage.from('note-images').getPublicUrl(path);
+                uploadedUrls.push(url.publicUrl);
+            }
 
-        const fileName = `data/${sub}_${chap.replace(/\s+/g, '_')}.json`;
-        let sha = null, data = { subject: sub, chapter: chap, notes: [] };
-
-        const check = await gh(fileName);
-        if (check.ok) { sha = (await check.json()).sha; const content = await gh(fileName); data = JSON.parse(atob((await content.json()).content)); }
-
-        data.notes.push({ id: Date.now(), author: localStorage.getItem("v_user"), pages: imgs });
-        await gh(fileName, "PUT", { message: "Update", content: btoa(unescape(encodeURIComponent(JSON.stringify(data)))), sha });
-
-        alert("Done!"); closeModal('up-modal'); sync();
+            await supabase.from('notes_table').insert([{ subject: sub, chapter: chap, author: localStorage.getItem("v_user"), pages: uploadedUrls }]);
+            alert("Done!"); closeModal('up-modal'); sync();
+        } catch(e) { alert("Error: " + e.message); }
         btn.innerText = "Upload"; btn.disabled = false;
     }
 
@@ -218,67 +170,47 @@
             card.innerHTML = `
                 <div class="card-header"><span>${item.chapter.toUpperCase()}</span> <small style="color:var(--accent);">${item.subject}</small></div>
                 <div class="card-body">
-                    ${item.notes.map(n => `
-                        <div class="note-row">
-                            <span>By <b>${n.author}</b></span>
-                            <div class="actions">
-                                <button class="btn-action btn-view" onclick="viewPages('${item.chapter}', ${n.id})">View (${n.pages.length})</button>
-                                ${n.author === localStorage.getItem("v_user") ? `<button class="btn-action btn-del" onclick="deleteNote('${item.chapter}', ${n.id})">Del</button>` : ''}
-                            </div>
+                    <div class="note-row">
+                        <span>By <b>${item.author}</b></span>
+                        <div class="actions">
+                            <button class="btn-action btn-view" onclick="viewPages('${item.chapter}', ${item.id})">View (${item.pages.length})</button>
+                            ${item.author === localStorage.getItem("v_user") ? `<button class="btn-action btn-del" onclick="deleteNote(${item.id})">Del</button>` : ''}
                         </div>
-                    `).join('')}
+                    </div>
                 </div>
             `;
             grid.appendChild(card);
         });
     }
 
-    function viewPages(chapName, noteId) {
-        const chap = db.find(d => d.chapter === chapName);
-        const note = chap.notes.find(n => n.id === noteId);
+    function viewPages(chapName, id) {
+        const note = db.find(n => n.id === id);
         const gal = document.getElementById('gallery');
         document.getElementById('pre-title').innerText = `${chapName.toUpperCase()} - ${note.author}`;
         gal.innerHTML = note.pages.map((p, i) => `
             <div style="background:#000; padding:10px; border-radius:12px; text-align:center; border:1px solid #222; margin-bottom:15px;">
                 <img src="${p}" style="width:100%; border-radius:8px; margin-bottom:12px;">
-                <a href="${p}" download="${chapName}_${i+1}.png" style="display:block; padding:12px; background:var(--accent); color:white; text-decoration:none; border-radius:8px; font-weight:bold; font-size:14px;">Download Photo ${i+1}</a>
+                <a href="${p}" target="_blank" style="display:block; padding:12px; background:var(--accent); color:white; text-decoration:none; border-radius:8px; font-weight:bold; font-size:14px;">Open Photo ${i+1}</a>
             </div>
         `).join('');
         openModal('pre-modal');
     }
 
-    async function deleteNote(chapName, noteId) {
+    async function deleteNote(id) {
         if(!confirm("Pakka delete karein?")) return;
-        const chap = db.find(d => d.chapter === chapName);
-        chap.notes = chap.notes.filter(n => n.id !== noteId);
-        
-        const fileName = `data/${chap.subject}_${chapName.replace(/\s+/g, '_')}.json`;
-        const check = await gh(fileName);
-        const sha = (await check.json()).sha;
-        
-        if(chap.notes.length === 0) {
-            await gh(fileName, "DELETE", { message: "Remove empty chapter", sha });
-        } else {
-            await gh(fileName, "PUT", { message: "Delete note", content: btoa(unescape(encodeURIComponent(JSON.stringify(chap)))), sha });
-        }
+        await supabase.from('notes_table').delete().eq('id', id);
         sync();
     }
 
     async function sendChat() {
         const input = document.getElementById('chat-input'), user = localStorage.getItem("v_user");
         if(!input.value.trim()) return;
-        chats.unshift({ id: Date.now(), user, text: input.value });
-        const check = await gh("hub_chat.json");
-        let sha = check.ok ? (await check.json()).sha : null;
-        await gh("hub_chat.json", "PUT", { message: "Chat", content: btoa(JSON.stringify(chats.slice(0,30))), sha });
+        await supabase.from('messages').insert([{ sender_name: user, content: input.value }]);
         input.value = ""; sync();
     }
 
     async function deleteChat(id) {
-        chats = chats.filter(c => c.id !== id);
-        const check = await gh("hub_chat.json");
-        let sha = (await check.json()).sha;
-        await gh("hub_chat.json", "PUT", { message: "Del Chat", content: btoa(JSON.stringify(chats)), sha });
+        await supabase.from('messages').delete().eq('id', id);
         sync();
     }
 
@@ -286,9 +218,9 @@
         const me = localStorage.getItem("v_user");
         document.getElementById('hub-list').innerHTML = chats.map(c => `
             <div class="msg-box">
-                <small style="color:var(--accent); font-weight:bold;">${c.user}</small>
-                <div style="font-size:13px; margin-top:3px;">${c.text}</div>
-                ${c.user === me ? `<span class="msg-del" onclick="deleteChat(${c.id})">&times;</span>` : ''}
+                <small style="color:var(--accent); font-weight:bold;">${c.sender_name}</small>
+                <div style="font-size:13px; margin-top:3px;">${c.content}</div>
+                ${c.sender_name === me ? `<span class="msg-del" onclick="deleteChat(${c.id})">&times;</span>` : ''}
             </div>
         `).join('');
     }
