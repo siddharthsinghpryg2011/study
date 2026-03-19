@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vault.10 | Ultimate Study Hub</title>
+    <title>Vault.10 | Owner Control</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -22,40 +22,43 @@
         .sub-pill { padding: 8px 18px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text-dim); cursor: pointer; white-space: nowrap; font-size: 13px; font-weight: 600; }
         .sub-pill.active { background: var(--accent); color: white; border-color: var(--accent); }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; padding: 15px; max-width: 1200px; margin: auto; }
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 15px; overflow: hidden; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 15px; overflow: hidden; display: flex; flex-direction: column; }
         .card-header { padding: 12px 15px; background: #1a1a1a; border-bottom: 1px solid var(--border); font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
-        .card-body { padding: 15px; }
+        .card-body { padding: 15px; flex-grow: 1; }
+        .btn-row { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-action { flex: 1; padding: 10px; border: 0; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 12px; }
+        .btn-view { background: var(--accent); color: white; }
+        .btn-del { background: #222; color: var(--danger); border: 1px solid #333; }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9000; flex-direction: column; }
         .modal-header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: #000; border-bottom: 1px solid #222; }
         #gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; padding: 20px; overflow-y: auto; flex: 1; }
         .preview-item { background: #151515; border-radius: 12px; padding: 12px; border: 1px solid #222; text-align: center; }
         .preview-item img, .preview-item iframe { width: 100%; height: 300px; border-radius: 8px; object-fit: contain; background: #000; margin-bottom: 12px; border: 0; }
-        .btn-download { display: inline-block; width: 45%; padding: 12px; background: var(--success); color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; border: 0; }
+        .btn-download { display: inline-block; width: 45%; padding: 12px; background: var(--success); color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 11px; text-align: center; }
         #hub-overlay { position: fixed; right: -100%; top: 0; width: 100%; max-width: 350px; height: 100%; background: var(--card); border-left: 1px solid var(--border); z-index: 5000; transition: 0.4s; padding: 20px; display: flex; flex-direction: column; box-sizing: border-box; }
         #hub-overlay.open { right: 0; }
-        .toast { position: fixed; top: 20px; right: 20px; background: var(--accent); color: white; padding: 12px 20px; border-radius: 10px; z-index: 11000; font-weight: bold; animation: slideIn 0.3s; }
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--success); color: white; padding: 12px 25px; border-radius: 50px; z-index: 11000; font-weight: bold; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.1); }
         .fab { position: fixed; border-radius: 50px; border: 0; color: white; cursor: pointer; z-index: 2000; display: flex; align-items: center; justify-content: center; font-weight: bold; }
         .add-fab { bottom: 20px; left: 20px; width: 55px; height: 55px; background: var(--accent); font-size: 28px; }
-        .logout-btn { bottom: 20px; right: 20px; padding: 12px 25px; background: var(--danger); font-size: 12px; border-radius: 30px; }
-        .hub-btn { bottom: 85px; right: 20px; width: 50px; height: 50px; background: #222; border: 1px solid #333; border-radius: 50%; }
-        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .logout-btn { bottom: 20px; right: 20px; padding: 12px 25px; background: var(--danger); font-size: 11px; border-radius: 30px; letter-spacing: 1px; }
+        .hub-btn { bottom: 85px; right: 20px; width: 50px; height: 50px; background: #111; border: 1px solid #333; border-radius: 50%; }
     </style>
 </head>
 <body>
 
 <div id="gate" style="position:fixed; inset:0; background:var(--bg); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-    <h1 style="font-size:3rem; margin:0;">VAULT<span>.10</span></h1>
-    <input type="password" id="pass" placeholder="Access Key" style="padding:15px; width:250px; border-radius:10px; background:#111; border:1px solid #333; color:white; margin:20px 0; text-align:center;">
-    <button onclick="login()" style="width:250px; padding:15px; background:var(--accent); color:white; border:0; border-radius:10px; font-weight:bold;">ENTER</button>
+    <h1 style="font-size:3rem; margin:0; letter-spacing:-2px;">VAULT<span>.10</span></h1>
+    <input type="password" id="pass" placeholder="Access Key" style="padding:15px; width:260px; border-radius:12px; background:#111; border:1px solid #333; color:white; margin:25px 0; text-align:center; font-size:16px;">
+    <button onclick="login()" style="width:260px; padding:15px; background:var(--accent); color:white; border:0; border-radius:12px; font-weight:900; cursor:pointer;">ACCESS HUB</button>
 </div>
 
 <header>
     <div class="brand" onclick="location.reload()">VAULT<span>.10</span></div>
-    <div id="u-display" style="font-weight:bold; color:var(--text-dim); font-size:12px;"></div>
+    <div id="u-display" style="font-weight:900; color:var(--accent); font-size:12px; letter-spacing:1px;"></div>
 </header>
 
 <div class="controls">
-    <input type="text" id="search-bar" placeholder="Search chapter..." oninput="render()">
+    <input type="text" id="search-bar" placeholder="Search chapter (Case Sensitive)..." oninput="render()">
     <nav id="subject-nav">
         <button class="sub-pill active" onclick="setSub('All', this)">All</button>
         <button class="sub-pill" onclick="setSub('Maths', this)">Maths</button>
@@ -69,34 +72,36 @@
 <div id="main-grid" class="grid"></div>
 
 <div id="up-modal" class="modal" style="justify-content:center; align-items:center;">
-    <div style="background:var(--card); padding:25px; border-radius:20px; width:90%; max-width:380px; border:1px solid var(--border);">
-        <h3>Upload Notes</h3>
-        <select id="f-sub" style="width:100%; padding:12px; background:#000; color:white; border:1px solid #333; border-radius:8px; margin-bottom:15px;">
+    <div style="background:var(--card); padding:30px; border-radius:24px; width:90%; max-width:400px; border:1px solid var(--border);">
+        <h2 style="margin-top:0;">Upload Notes</h2>
+        <select id="f-sub" style="width:100%; padding:14px; background:#000; color:white; border:1px solid #333; border-radius:10px; margin-bottom:15px;">
             <option>Maths</option><option>Science</option><option>SST</option><option>Hindi</option><option>English</option>
         </select>
-        <input type="text" id="f-chap" placeholder="Chapter Name (Case Sensitive)" style="width:100%; padding:12px; background:#000; color:white; border:1px solid #333; border-radius:8px; margin-bottom:15px; box-sizing:border-box;">
-        <input type="file" id="f-files" multiple accept="image/*,.pdf" style="margin-bottom:20px; font-size:12px;">
-        <button onclick="pushNotes()" id="up-btn" style="width:100%; padding:15px; background:var(--accent); color:white; border:0; border-radius:10px; font-weight:bold;">UPLOAD</button>
-        <button onclick="closeModal('up-modal')" style="width:100%; background:none; border:0; color:var(--text-dim); margin-top:10px;">Cancel</button>
+        <input type="text" id="f-chap" placeholder="Chapter Title (e.g. Real Numbers)" style="width:100%; padding:14px; background:#000; color:white; border:1px solid #333; border-radius:10px; margin-bottom:15px; box-sizing:border-box;">
+        <input type="file" id="f-files" multiple accept="image/*,.pdf" style="margin-bottom:20px; font-size:12px; color:var(--text-dim);">
+        <button onclick="pushNotes()" id="up-btn" style="width:100%; padding:16px; background:var(--accent); color:white; border:0; border-radius:12px; font-weight:bold; cursor:pointer;">PUBLISH TO VAULT</button>
+        <button onclick="closeModal('up-modal')" style="width:100%; background:none; border:0; color:var(--text-dim); margin-top:15px; cursor:pointer;">Cancel</button>
     </div>
 </div>
 
 <div id="pre-modal" class="modal">
     <div class="modal-header">
-        <h3 id="pre-title" style="margin:0;">PREVIEW</h3>
-        <button onclick="closeModal('pre-modal')" style="background:none; border:0; color:white; font-size:30px;">&times;</button>
+        <h3 id="pre-title" style="margin:0; font-weight:900;">PREVIEW</h3>
+        <button onclick="closeModal('pre-modal')" style="background:none; border:0; color:white; font-size:35px; cursor:pointer;">&times;</button>
     </div>
     <div id="gallery"></div>
 </div>
 
 <div id="hub-overlay">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h2>Activity Hub</h2>
-        <button onclick="toggleHub(false)" style="background:none; border:0; color:white; font-size:25px;">&times;</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 style="margin:0;">Global Chat</h2>
+        <button onclick="toggleHub(false)" style="background:none; border:0; color:white; font-size:30px; cursor:pointer;">&times;</button>
     </div>
-    <div id="hub-list" style="flex:1; overflow-y:auto; margin:15px 0;"></div>
-    <input type="text" id="chat-input" placeholder="Say something..." style="width:100%; padding:12px; background:#000; border:1px solid #333; color:white; border-radius:8px;">
-    <button onclick="sendChat()" style="width:100%; padding:12px; background:var(--accent); color:white; border:0; border-radius:8px; margin-top:10px; font-weight:bold;">SEND</button>
+    <div id="hub-list" style="flex:1; overflow-y:auto; margin-bottom:15px; scrollbar-width:none;"></div>
+    <div style="display:flex; gap:10px;">
+        <input type="text" id="chat-input" placeholder="Type a message..." style="flex:1; padding:14px; background:#000; border:1px solid #333; color:white; border-radius:12px;">
+        <button onclick="sendChat()" style="padding:0 20px; background:var(--accent); color:white; border:0; border-radius:12px; font-weight:bold;">></button>
+    </div>
 </div>
 
 <button class="fab add-fab" onclick="openModal('up-modal')">+</button>
@@ -113,7 +118,7 @@
     function login() {
         const p = document.getElementById('pass').value;
         if(keys[btoa(p)]) { localStorage.setItem("v_user", keys[btoa(p)]); location.reload(); }
-        else alert("Wrong Key!");
+        else alert("Access Denied!");
     }
     function logout() { localStorage.removeItem("v_user"); location.reload(); }
 
@@ -130,49 +135,67 @@
     async function sync() {
         const { data: n } = await supabaseClient.from('notes_table').select('*').order('id', {ascending: false});
         if(n) { db = n; render(); }
-        const { data: m } = await supabaseClient.from('messages').select('*').order('id', {ascending: false}).limit(20);
+        const { data: m } = await supabaseClient.from('messages').select('*').order('id', {ascending: false}).limit(30);
         if(m) renderHub(m);
     }
 
     function setupNotifications() {
-        supabaseClient.channel('db-changes')
+        supabaseClient.channel('custom-insert-channel')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notes_table' }, payload => {
-            showToast(`🚀 New Notes: ${payload.new.chapter}`);
+            showToast(`🚀 New: ${payload.new.chapter} by ${payload.new.author}`);
             sync();
         }).subscribe();
     }
 
     function showToast(msg) {
         const t = document.createElement('div'); t.className="toast"; t.innerText=msg;
-        document.body.appendChild(t); setTimeout(()=>t.remove(), 4000);
+        document.body.appendChild(t); setTimeout(()=>t.remove(), 5000);
     }
 
     function render() {
         const grid = document.getElementById('main-grid');
-        const query = document.getElementById('search-bar').value.toLowerCase();
+        const query = document.getElementById('search-bar').value;
+        const currentUser = localStorage.getItem("v_user");
         grid.innerHTML = "";
+        
         const grouped = {};
         db.forEach(item => {
-            if((activeSub === "All" || item.subject === activeSub) && item.chapter.toLowerCase().includes(query)) {
+            if((activeSub === "All" || item.subject === activeSub) && item.chapter.includes(query)) {
                 if(!grouped[item.chapter]) {
-                    grouped[item.chapter] = { ...item, allPages: [...item.pages], authors: [item.author] };
+                    grouped[item.chapter] = { ...item, allPages: [...item.pages], authors: [item.author], ids: [item.id] };
                 } else {
                     grouped[item.chapter].allPages.push(...item.pages);
                     if(!grouped[item.chapter].authors.includes(item.author)) grouped[item.chapter].authors.push(item.author);
+                    grouped[item.chapter].ids.push(item.id);
                 }
             }
         });
+
         Object.values(grouped).forEach(item => {
             const card = document.createElement('div');
             card.className = 'card';
+            // Check if current user is one of the authors of this grouped block
+            const isOwner = item.authors.includes(currentUser);
+            
             card.innerHTML = `
-                <div class="card-header"><span>${item.chapter}</span><small>${item.subject}</small></div>
+                <div class="card-header"><span>${item.chapter}</span><small style="color:var(--accent)">${item.subject}</small></div>
                 <div class="card-body">
-                    <p style="font-size:11px; color:var(--text-dim); margin-bottom:10px;">By: ${item.authors.join(', ')}</p>
-                    <button onclick="viewGrouped('${encodeURIComponent(JSON.stringify(item.allPages))}', '${item.chapter}')" style="width:100%; padding:10px; background:var(--accent); border:0; color:white; border-radius:8px; font-weight:bold; cursor:pointer;">VIEW ALL (${item.allPages.length})</button>
+                    <p style="font-size:11px; color:var(--text-dim); margin-bottom:12px;">By: ${item.authors.join(', ')}</p>
+                    <div class="btn-row">
+                        <button class="btn-action btn-view" onclick="viewGrouped('${encodeURIComponent(JSON.stringify(item.allPages))}', '${item.chapter}')">VIEW ALL (${item.allPages.length})</button>
+                        ${isOwner ? `<button class="btn-action btn-del" onclick="deleteBatch('${item.chapter}')">DELETE</button>` : ''}
+                    </div>
                 </div>`;
             grid.appendChild(card);
         });
+    }
+
+    async function deleteBatch(chapter) {
+        if(confirm(`Delete ALL your notes in "${chapter}"?`)) {
+            const user = localStorage.getItem("v_user");
+            await supabaseClient.from('notes_table').delete().eq('chapter', chapter).eq('author', user);
+            sync();
+        }
     }
 
     async function triggerDownload(url, name) {
@@ -194,8 +217,8 @@
             return `
                 <div class="preview-item">
                     ${isPDF ? `<iframe src="${p}#toolbar=0"></iframe>` : `<img src="${p}" loading="lazy">`}
-                    <div style="display:flex; gap:10px; justify-content:center;">
-                        <a href="${p}" target="_blank" class="btn-download" style="background:#333;">OPEN</a>
+                    <div style="display:flex; gap:10px; justify-content:center; margin-top:10px;">
+                        <a href="${p}" target="_blank" class="btn-download" style="background:#333;">OPEN FULL</a>
                         <button onclick="triggerDownload('${p}', '${title}_p${i+1}')" class="btn-download">DOWNLOAD</button>
                     </div>
                 </div>`;
@@ -207,7 +230,7 @@
         const sub = document.getElementById('f-sub').value, 
               chap = document.getElementById('f-chap').value.trim(), 
               files = document.getElementById('f-files').files;
-        if(!chap || files.length === 0) return alert("Details bhariye!");
+        if(!chap || files.length === 0) return alert("Missing Details!");
         const btn = document.getElementById('up-btn'); btn.innerText = "UPLOADING..."; btn.disabled = true;
         try {
             const urls = [];
@@ -220,8 +243,9 @@
             }
             await supabaseClient.from('notes_table').insert([{ subject: sub, chapter: chap, author: localStorage.getItem("v_user"), pages: urls }]);
             closeModal('up-modal'); sync();
+            document.getElementById('f-chap').value = ""; document.getElementById('f-files').value = "";
         } catch(e) { alert("Error: " + e.message); }
-        btn.innerText = "UPLOAD"; btn.disabled = false;
+        btn.innerText = "PUBLISH TO VAULT"; btn.disabled = false;
     }
 
     async function sendChat() {
@@ -233,9 +257,9 @@
 
     function renderHub(msgs) {
         document.getElementById('hub-list').innerHTML = msgs.map(m => `
-            <div style="background:#000; padding:10px; border-radius:8px; margin-bottom:8px; border-left:3px solid var(--accent);">
-                <small style="color:var(--accent); font-weight:bold;">${m.sender_name}</small>
-                <div style="font-size:13px;">${m.content}</div>
+            <div style="background:#000; padding:12px; border-radius:12px; margin-bottom:10px; border-left:4px solid var(--accent);">
+                <small style="color:var(--accent); font-weight:900; font-size:10px;">${m.sender_name}</small>
+                <div style="font-size:13px; margin-top:4px;">${m.content}</div>
             </div>`).join('');
     }
 
