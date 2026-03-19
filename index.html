@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vault.10 | Grouped Hub</title>
+    <title>Vault.10 | Ultimate Study Hub</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -13,42 +13,31 @@
             --danger: #ef4444; --success: #22c55e;
         }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
-        
         header { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(5,5,5,0.8); backdrop-filter: blur(15px); position: sticky; top: 0; z-index: 1000; }
         .brand { font-size: 1.4rem; font-weight: 900; cursor: pointer; letter-spacing: -1px; }
         .brand span { color: var(--accent); }
-        
         .controls { max-width: 900px; margin: 15px auto; padding: 0 15px; }
         #search-bar { width: 100%; padding: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; color: white; outline: none; margin-bottom: 15px; box-sizing: border-box; }
-        
         nav { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
         .sub-pill { padding: 8px 18px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text-dim); cursor: pointer; white-space: nowrap; font-size: 13px; font-weight: 600; }
         .sub-pill.active { background: var(--accent); color: white; border-color: var(--accent); }
-
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; padding: 15px; max-width: 1200px; margin: auto; }
         .card { background: var(--card); border: 1px solid var(--border); border-radius: 15px; overflow: hidden; }
         .card-header { padding: 12px 15px; background: #1a1a1a; border-bottom: 1px solid var(--border); font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
         .card-body { padding: 15px; }
-        .author-tag { font-size: 11px; background: #222; padding: 4px 8px; border-radius: 6px; color: var(--accent); font-weight: bold; }
-
-        /* Modal & Preview */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9000; flex-direction: column; }
         .modal-header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: #000; border-bottom: 1px solid #222; }
         #gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; padding: 20px; overflow-y: auto; flex: 1; }
         .preview-item { background: #151515; border-radius: 12px; padding: 12px; border: 1px solid #222; text-align: center; }
         .preview-item img, .preview-item iframe { width: 100%; height: 300px; border-radius: 8px; object-fit: contain; background: #000; margin-bottom: 12px; border: 0; }
         .btn-download { display: inline-block; width: 45%; padding: 12px; background: var(--success); color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; border: 0; }
-
-        /* Hub & Toasts */
         #hub-overlay { position: fixed; right: -100%; top: 0; width: 100%; max-width: 350px; height: 100%; background: var(--card); border-left: 1px solid var(--border); z-index: 5000; transition: 0.4s; padding: 20px; display: flex; flex-direction: column; box-sizing: border-box; }
         #hub-overlay.open { right: 0; }
         .toast { position: fixed; top: 20px; right: 20px; background: var(--accent); color: white; padding: 12px 20px; border-radius: 10px; z-index: 11000; font-weight: bold; animation: slideIn 0.3s; }
-
         .fab { position: fixed; border-radius: 50px; border: 0; color: white; cursor: pointer; z-index: 2000; display: flex; align-items: center; justify-content: center; font-weight: bold; }
         .add-fab { bottom: 20px; left: 20px; width: 55px; height: 55px; background: var(--accent); font-size: 28px; }
         .logout-btn { bottom: 20px; right: 20px; padding: 12px 25px; background: var(--danger); font-size: 12px; border-radius: 30px; }
         .hub-btn { bottom: 85px; right: 20px; width: 50px; height: 50px; background: #222; border: 1px solid #333; border-radius: 50%; }
-
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
     </style>
 </head>
@@ -72,6 +61,7 @@
         <button class="sub-pill" onclick="setSub('Maths', this)">Maths</button>
         <button class="sub-pill" onclick="setSub('Science', this)">Science</button>
         <button class="sub-pill" onclick="setSub('SST', this)">SST</button>
+        <button class="sub-pill" onclick="setSub('Hindi', this)">Hindi</button>
         <button class="sub-pill" onclick="setSub('English', this)">English</button>
     </nav>
 </div>
@@ -82,9 +72,9 @@
     <div style="background:var(--card); padding:25px; border-radius:20px; width:90%; max-width:380px; border:1px solid var(--border);">
         <h3>Upload Notes</h3>
         <select id="f-sub" style="width:100%; padding:12px; background:#000; color:white; border:1px solid #333; border-radius:8px; margin-bottom:15px;">
-            <option>Maths</option><option>Science</option><option>SST</option><option>English</option><option>Hindi</option>
+            <option>Maths</option><option>Science</option><option>SST</option><option>Hindi</option><option>English</option>
         </select>
-        <input type="text" id="f-chap" placeholder="Chapter Name (Exact case)" style="width:100%; padding:12px; background:#000; color:white; border:1px solid #333; border-radius:8px; margin-bottom:15px; box-sizing:border-box;">
+        <input type="text" id="f-chap" placeholder="Chapter Name (Case Sensitive)" style="width:100%; padding:12px; background:#000; color:white; border:1px solid #333; border-radius:8px; margin-bottom:15px; box-sizing:border-box;">
         <input type="file" id="f-files" multiple accept="image/*,.pdf" style="margin-bottom:20px; font-size:12px;">
         <button onclick="pushNotes()" id="up-btn" style="width:100%; padding:15px; background:var(--accent); color:white; border:0; border-radius:10px; font-weight:bold;">UPLOAD</button>
         <button onclick="closeModal('up-modal')" style="width:100%; background:none; border:0; color:var(--text-dim); margin-top:10px;">Cancel</button>
@@ -117,7 +107,6 @@
     const SB_URL = "https://eqzkbvktpwzoojhsubum.supabase.co";
     const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxemtidmt0cHd6b29qaHN1YnVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4ODIxMTAsImV4cCI6MjA4OTQ1ODExMH0.9Oaw3NH3ponUEJL9mKWSgccxA8eyNaie4mfwN1E_8b8";
     const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
-
     const keys = { "U2lkIzl4WjI=": "Siddharth", "VGVqKjRrTDc=": "Tejeshwar", "QWp5JjFtUDU=": "Ajay", "SXNoKjlNMmI=": "Ishmeet" };
     let db = []; let activeSub = "All";
 
@@ -146,9 +135,9 @@
     }
 
     function setupNotifications() {
-        supabaseClient.channel('custom-all-channel')
+        supabaseClient.channel('db-changes')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notes_table' }, payload => {
-            showToast(`🚀 New Note in ${payload.new.chapter}!`);
+            showToast(`🚀 New Notes: ${payload.new.chapter}`);
             sync();
         }).subscribe();
     }
@@ -158,12 +147,10 @@
         document.body.appendChild(t); setTimeout(()=>t.remove(), 4000);
     }
 
-    // Grouping Logic: Same Chapter = One Card
     function render() {
         const grid = document.getElementById('main-grid');
         const query = document.getElementById('search-bar').value.toLowerCase();
         grid.innerHTML = "";
-
         const grouped = {};
         db.forEach(item => {
             if((activeSub === "All" || item.subject === activeSub) && item.chapter.toLowerCase().includes(query)) {
@@ -175,21 +162,19 @@
                 }
             }
         });
-
         Object.values(grouped).forEach(item => {
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
                 <div class="card-header"><span>${item.chapter}</span><small>${item.subject}</small></div>
                 <div class="card-body">
-                    <p style="font-size:11px; color:var(--text-dim); margin:0 0 10px;">Authors: ${item.authors.join(', ')}</p>
+                    <p style="font-size:11px; color:var(--text-dim); margin-bottom:10px;">By: ${item.authors.join(', ')}</p>
                     <button onclick="viewGrouped('${encodeURIComponent(JSON.stringify(item.allPages))}', '${item.chapter}')" style="width:100%; padding:10px; background:var(--accent); border:0; color:white; border-radius:8px; font-weight:bold; cursor:pointer;">VIEW ALL (${item.allPages.length})</button>
                 </div>`;
             grid.appendChild(card);
         });
     }
 
-    // Real Download Handler
     async function triggerDownload(url, name) {
         const res = await fetch(url);
         const blob = await res.blob();
@@ -210,7 +195,7 @@
                 <div class="preview-item">
                     ${isPDF ? `<iframe src="${p}#toolbar=0"></iframe>` : `<img src="${p}" loading="lazy">`}
                     <div style="display:flex; gap:10px; justify-content:center;">
-                        <a href="${p}" target="_blank" class="btn-download" style="background:#333;">FULL VIEW</a>
+                        <a href="${p}" target="_blank" class="btn-download" style="background:#333;">OPEN</a>
                         <button onclick="triggerDownload('${p}', '${title}_p${i+1}')" class="btn-download">DOWNLOAD</button>
                     </div>
                 </div>`;
@@ -222,8 +207,7 @@
         const sub = document.getElementById('f-sub').value, 
               chap = document.getElementById('f-chap').value.trim(), 
               files = document.getElementById('f-files').files;
-        if(!chap || files.length === 0) return alert("Fill details!");
-        
+        if(!chap || files.length === 0) return alert("Details bhariye!");
         const btn = document.getElementById('up-btn'); btn.innerText = "UPLOADING..."; btn.disabled = true;
         try {
             const urls = [];
