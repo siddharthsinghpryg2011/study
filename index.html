@@ -42,7 +42,7 @@
         .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; transition: 0.3s; }
         .card:hover { border-color: #444; }
         .card-header { padding: 15px; background: #1a1a1a; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .card-header h3 { margin: 0; font-size: 16px; font-weight: 900; text-transform: uppercase; }
+        .card-header h3 { margin: 0; font-size: 16px; font-weight: 900; text-transform: none; }
         
         .user-section { padding: 12px; border-bottom: 1px solid #222; }
         .user-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -205,7 +205,6 @@
         });
     }
 
-    // UPDATED VIEWER: PDF + DOWNLOAD BUTTONS IN SEPARATE DIVS
     function viewPages(encodedData) {
         try {
             const pages = JSON.parse(decodeURIComponent(encodedData));
@@ -289,7 +288,7 @@
         const user = localStorage.getItem("v_user");
         if (user) {
             document.getElementById('gate').style.display = 'none';
-            document.getElementById('u-display').innerText = user.toUpperCase();
+            document.getElementById('u-display').innerText = user; 
             sync();
             supabaseClient.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'notes_table' }, sync).subscribe();
         }
